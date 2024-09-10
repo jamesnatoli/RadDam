@@ -12,14 +12,14 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Prompt_v3')
+#process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Prompt_v3')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '124X_dataRun3_Prompt_v10')
 
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Sep2018Rereco_v1')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v11')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v14'
-process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v4')
 
+process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v4')
 # process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 250

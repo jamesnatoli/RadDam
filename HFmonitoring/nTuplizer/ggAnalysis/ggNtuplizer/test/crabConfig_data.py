@@ -24,10 +24,8 @@ if __name__ == '__main__':
     config.Data.inputDBS        = 'global'    
     config.Data.splitting       = 'LumiBased' 
     # Change this...
-    # config.Data.lumiMask        = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt' # 58.83 /fb
     #config.Data.lumiMask        = '/afs/cern.ch/work/j/jnatoli/private/HFCalib/CMSSW_12_3_7/src/RadDam/HFmonitoring/nTuplizer/ggAnalysis/ggNtuplizer/test/LumiMasks/Cert_Collisions2022_355100_362760_Golden.json'
-    config.Data.lumiMask        = '/afs/cern.ch/user/n/naislam/HFCaliberation/2024/CMSSW_14_0_11/src/RadDam/HFmonitoring/nTuplizer/ggAnalysis/ggNtuplizer/test/LumiMasks/\
-Cert_Collisions2024_378981_383743_Golden.json'
+    config.Data.lumiMask        = '/afs/cern.ch/user/n/naislam/HFCaliberation/2024/test/CMSSW_14_0_11/src/RadDam/HFmonitoring/nTuplizer/ggAnalysis/ggNtuplizer/test/LumiMasks/Cert_Collisions2024_378981_383743_Golden.json'
     config.Data.unitsPerJob     = 20
     config.Data.ignoreLocality  = False
     config.Data.publication     = False
@@ -51,15 +49,15 @@ Cert_Collisions2024_378981_383743_Golden.json'
     # DAS SEARCH "dataset=/EGamma/Run2022*/MINIAOD"
 
     # Run2022A is all commissioning
+    '''
+    Run2022B
+    config.General.requestName = 'EGamma_Run2022B'
+    config.Data.inputDataset   = '/EGamma/Run2022B-10Dec2022-v1/MINIAOD'
+    config.Data.outLFNDirBase  = '/store/user/jnatoli/2022HF/'
+    p = Process(target=submit, args=(config,))
+    p.start()
+    p.join()
 
-    # Run2022B
-    # config.General.requestName = 'EGamma_Run2022B'
-    # config.Data.inputDataset   = '/EGamma/Run2022B-10Dec2022-v1/MINIAOD'
-    # config.Data.outLFNDirBase  = '/store/user/jnatoli/2022HF/'
-    # p = Process(target=submit, args=(config,))
-    # p.start()
-    # p.join()
-'''
     # Run2022C
     config.General.requestName = 'EGamma_Run2022C'
     config.Data.inputDataset   = '/EGamma/Run2022C-10Dec2022-v1/MINIAOD'
@@ -83,7 +81,7 @@ Cert_Collisions2024_378981_383743_Golden.json'
     p = Process(target=submit, args=(config,))                                                                        
     p.start()                                                                                                 
     p.join()
-'''
+    '''
 
     config.General.requestName = 'EGamma1_Run2024F'
     config.Data.inputDataset   = '/EGamma1/Run2024F-PromptReco-v1/MINIAOD'
@@ -91,14 +89,16 @@ Cert_Collisions2024_378981_383743_Golden.json'
     p = Process(target=submit, args=(config,))
     p.start()
     p.join()
+
+    '''
     # E, F, and G only have PromptReco as of April 27, 2023
 
-    # Run2022B, trying the PromptReco set?
-    # config.General.requestName = 'EGamma_Run2022B'
-    # config.Data.inputDataset   = '/EGamma/Run2022B-PromptReco-v1/MINIAOD'
-    # config.Data.outLFNDirBase  = '/store/user/jnatoli/2022HF/'
-    # p = Process(target=submit, args=(config,))
-    # p.start()
-    # p.join()
-
+    Run2022B, trying the PromptReco set?
+    config.General.requestName = 'EGamma_Run2022B'
+    config.Data.inputDataset   = '/EGamma/Run2022B-PromptReco-v1/MINIAOD'
+    config.Data.outLFNDirBase  = '/store/user/jnatoli/2022HF/'
+    p = Process(target=submit, args=(config,))
+    p.start()
+    p.join()
+    '''
     

@@ -109,7 +109,6 @@ void xAna( TreeReader* pdata) {
 	continue;
       }
     }
-    cout << "Passed MC block" << endl;
 
     nvtx = 0;
     rho  = 0;
@@ -142,8 +141,6 @@ void xAna( TreeReader* pdata) {
     //                            << " (" << (100.0 * ev / nev)
     //                            << "%)"
     //                            << endl;
-
-    cout << 1 << endl;
     
     Int_t nHFEle = 0;
     Float_t* hfeleEn = 0;
@@ -176,7 +173,6 @@ void xAna( TreeReader* pdata) {
       hf_ecal.push_back(hfeleECALEn[i]);
       hf_hcal.push_back(hfeleHCALEn[i]);
 
-      cout << "2 - 3" << endl;
       if ( isMC ) {
 	TLorentzVector hf;
 	hf.SetPtEtaPhiM(hfelePt[i], hfeleEta[i], hfelePhi[i], 0);
@@ -196,11 +192,9 @@ void xAna( TreeReader* pdata) {
 	hf_match.push_back(-2);
       } // if ( isMC )
       ++nhf;
-      cout << "2 - 4" << endl;
+      
     } // for( nHFEle)
-    cout << "Passed HF block" << endl;
-    cout << "3" << endl;
-    
+   
     Int_t nEle = 0;
     Float_t*  elePt = 0;
     Float_t*  eleEta = 0;
@@ -300,7 +294,6 @@ void xAna( TreeReader* pdata) {
       ele_mediumID.push_back(isMediumEle);
 
     } // for (int iele...
-    cout << "Passed Ele block" << endl;
     
     // Selection criteria, either two electrons with pT 10 GeV in EB/EE
     // or one electron with 10 GeV in EB/EE and at least on HF electron
@@ -319,7 +312,6 @@ void xAna( TreeReader* pdata) {
     
 
     tree->Fill();
-    cout << "Event is done!" << endl;
   } // End Event Loop
   std::cout.flush();
   std::cout << "\n";
