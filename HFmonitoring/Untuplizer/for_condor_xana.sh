@@ -1,5 +1,5 @@
 #!/bin/bash
-# condor executable for xAna_data.C
+# condor executable for xAna.C
 
 # Collect arguments
 CLUSTERID=${1}
@@ -11,8 +11,8 @@ OUTFILE=output_data.root
 COPYDIR=${5}
 
 # Run executable
-echo "Executing xanadata"
-./xanadata ${CHUNKLIST}
+echo "Executing xana"
+./xana ${CHUNKLIST}
 
 # Copy Output
 if [ -f ${OUTFILE} ]; then

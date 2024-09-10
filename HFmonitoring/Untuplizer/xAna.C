@@ -21,7 +21,7 @@ using namespace std;
 #include "../progressBar.C"
 
 // Main work function
-void xAna_data( TreeReader* pdata) {
+void xAna( TreeReader* pdata) {
   TreeReader data = *pdata;
 
   int nvtx;
@@ -74,7 +74,9 @@ void xAna_data( TreeReader* pdata) {
   tree->Branch("mc_eta",     &mc_eta);
   tree->Branch("mc_phi",     &mc_phi);
 
-  bool condor = true;
+  bool condor = false;
+  bool isMC = true;
+  
   Long64_t nev = data.GetEntriesFast();
   std::cout << "Processing " << nev << " events..." << std::endl;
   std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
@@ -82,7 +84,6 @@ void xAna_data( TreeReader* pdata) {
     //for (Long64_t ev = 0; ev < 100000; ++ev) {
     data.GetEntry(ev);    
     
-    bool isMC = false;
     vector<TLorentzVector> genElectrons;
 
     if ( isMC ) {
@@ -104,8 +105,11 @@ void xAna_data( TreeReader* pdata) {
 	  }
 	}
       }
-      if ( nmc != 0 && genElectrons.size() != 2 ) continue;
+      if ( nmc != 0 && genElectrons.size() != 2 ) {
+	continue;
+      }
     }
+    cout << "Passed MC block" << endl;
 
     nvtx = 0;
     rho  = 0;
@@ -139,6 +143,8 @@ void xAna_data( TreeReader* pdata) {
     //                            << "%)"
     //                            << endl;
 
+    cout << 1 << endl;
+    
     Int_t nHFEle = 0;
     Float_t* hfeleEn = 0;
     Float_t* hfelePt = 0;
@@ -150,14 +156,16 @@ void xAna_data( TreeReader* pdata) {
     Float_t* hfeleHCALEn = 0;
 
     nHFEle      = data.GetInt("npfHF");
-    hfeleEn     = data.GetPtrFloat("pfHFEn");
-    hfelePt     = data.GetPtrFloat("pfHFPt");
-    hfeleEta    = data.GetPtrFloat("pfHFEta");
-    hfelePhi    = data.GetPtrFloat("pfHFPhi");
-    hfeleIso    = data.GetPtrFloat("pfHFIso");
-    hfeleECALEn = data.GetPtrFloat("pfHFECALEn");
-    hfeleHCALEn = data.GetPtrFloat("pfHFHCALEn");
-
+    if ( nHFEle != 0 ) {
+      hfeleEn     = data.GetPtrFloat("pfHFEn");
+      hfelePt     = data.GetPtrFloat("pfHFPt");
+      hfeleEta    = data.GetPtrFloat("pfHFEta");
+      hfelePhi    = data.GetPtrFloat("pfHFPhi");
+      hfeleIso    = data.GetPtrFloat("pfHFIso");
+      hfeleECALEn = data.GetPtrFloat("pfHFECALEn");
+      hfeleHCALEn = data.GetPtrFloat("pfHFHCALEn");
+    }
+    
     for(int i = 0; i != nHFEle; ++i) {      
       double iso   = hfeleIso[i];
       hf_en.push_back(hfeleEn[i]);
@@ -167,7 +175,8 @@ void xAna_data( TreeReader* pdata) {
       hf_iso.push_back(iso);
       hf_ecal.push_back(hfeleECALEn[i]);
       hf_hcal.push_back(hfeleHCALEn[i]);
-      
+
+      cout << "2 - 3" << endl;
       if ( isMC ) {
 	TLorentzVector hf;
 	hf.SetPtEtaPhiM(hfelePt[i], hfeleEta[i], hfelePhi[i], 0);
@@ -187,8 +196,11 @@ void xAna_data( TreeReader* pdata) {
 	hf_match.push_back(-2);
       } // if ( isMC )
       ++nhf;
+      cout << "2 - 4" << endl;
     } // for( nHFEle)
-
+    cout << "Passed HF block" << endl;
+    cout << "3" << endl;
+    
     Int_t nEle = 0;
     Float_t*  elePt = 0;
     Float_t*  eleEta = 0;
@@ -209,22 +221,24 @@ void xAna_data( TreeReader* pdata) {
     nvtx     = data.GetInt("nVtx");
     rho      = data.GetFloat("rho");
     nEle     = data.GetInt("nEle");
-    elePt    = data.GetPtrFloat("elePt");
-    eleEta   = data.GetPtrFloat("eleEta");
-    eleSCEta = data.GetPtrFloat("eleSCEta");
-    elePhi   = data.GetPtrFloat("elePhi");
-    eleConvVeto   = data.GetPtrInt("eleConvVeto");
-    eleMissHits   = data.GetPtrInt("eleMissHits");
-    eleEoverPInv   = data.GetPtrFloat("eleEoverPInv");
-    eleSigmaIEtaIEtaFull5x5   = data.GetPtrFloat("eleSigmaIEtaIEtaFull5x5");
-    eledEtaAtVtx   = data.GetPtrFloat("eledEtaAtVtx");
-    eledPhiAtVtx   = data.GetPtrFloat("eledPhiAtVtx");
-    eleHoverE   = data.GetPtrFloat("eleHoverE");
-    elePFChIso   = data.GetPtrFloat("elePFChIso");
-    elePFPhoIso   = data.GetPtrFloat("elePFPhoIso");
-    elePFNeuIso   = data.GetPtrFloat("elePFNeuIso");
-    eleESEffSigmaRR   = data.GetPtrFloat("eleESEffSigmaRR");
-
+    if ( nEle != 0 ) {
+      elePt    = data.GetPtrFloat("elePt");
+      eleEta   = data.GetPtrFloat("eleEta");
+      eleSCEta = data.GetPtrFloat("eleSCEta");
+      elePhi   = data.GetPtrFloat("elePhi");
+      eleConvVeto   = data.GetPtrInt("eleConvVeto");
+      eleMissHits   = data.GetPtrInt("eleMissHits");
+      eleEoverPInv   = data.GetPtrFloat("eleEoverPInv");
+      eleSigmaIEtaIEtaFull5x5   = data.GetPtrFloat("eleSigmaIEtaIEtaFull5x5");
+      eledEtaAtVtx   = data.GetPtrFloat("eledEtaAtVtx");
+      eledPhiAtVtx   = data.GetPtrFloat("eledPhiAtVtx");
+      eleHoverE   = data.GetPtrFloat("eleHoverE");
+      elePFChIso   = data.GetPtrFloat("elePFChIso");
+      elePFPhoIso   = data.GetPtrFloat("elePFPhoIso");
+      elePFNeuIso   = data.GetPtrFloat("elePFNeuIso");
+      eleESEffSigmaRR   = data.GetPtrFloat("eleESEffSigmaRR");
+    }
+    
     for(int iele = 0; iele != nEle; ++iele) {
       ele_pt .push_back(elePt[iele]);
       ele_eta.push_back(eleEta[iele]);
@@ -286,7 +300,7 @@ void xAna_data( TreeReader* pdata) {
       ele_mediumID.push_back(isMediumEle);
 
     } // for (int iele...
-
+    cout << "Passed Ele block" << endl;
     
     // Selection criteria, either two electrons with pT 10 GeV in EB/EE
     // or one electron with 10 GeV in EB/EE and at least on HF electron
@@ -305,6 +319,7 @@ void xAna_data( TreeReader* pdata) {
     
 
     tree->Fill();
+    cout << "Event is done!" << endl;
   } // End Event Loop
   std::cout.flush();
   std::cout << "\n";
@@ -314,14 +329,14 @@ void xAna_data( TreeReader* pdata) {
   tree->Write();
 }
 
-void xAna_data(std::vector<std::string> inpaths) {
+void xAna(std::vector<std::string> inpaths) {
   TreeReader* data = new TreeReader( inpaths);
-  xAna_data( data);
+  xAna( data);
 }
 
-void xAna_data(const char** inpaths, int npaths) {
+void xAna(const char** inpaths, int npaths) {
   TreeReader* data = new TreeReader(inpaths, npaths);
-  xAna_data( data);
+  xAna( data);
 }
 
 // for use with HTCondor
@@ -346,7 +361,7 @@ int main( int argc, char** argv) {
   // for (auto ele : inpaths)
   //   std::cout << ele << std::endl;
 
-  xAna_data( inpaths);
+  xAna( inpaths);
   std::cout << "All done!" << std::endl;
   return 0;
 }

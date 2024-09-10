@@ -18,12 +18,13 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '130X_dataRun3_Prompt_v3')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Sep2018Rereco_v1')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v11')
 # process.GlobalTag = GlobalTag(process.GlobalTag, '102X_dataRun2_Prompt_v14'
+process.GlobalTag = GlobalTag(process.GlobalTag, '140X_dataRun3_Prompt_v4')
 
 # process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 process.MessageLogger.cerr.FwkReport.reportEvery = 250
 
-process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring('/store/data/Run2023C/EGamma0/MINIAOD/22Sep2023_v1-v1/2530000/0180e051-34b5-47a0-a851-665aa47846fd.root'))
+process.source = cms.Source("PoolSource",fileNames = cms.untracked.vstring('/store/data/Run2024F/EGamma0/MINIAOD/PromptReco-v1/000/382/250/00000/133c3dd0-3b4d-46cd-af21-f5c2da6333db.root'))
 
 process.load("PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff" )
 process.load("PhysicsTools.PatAlgos.selectionLayer1.selectedPatCandidates_cff" )

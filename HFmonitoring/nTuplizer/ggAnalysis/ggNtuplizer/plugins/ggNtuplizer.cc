@@ -10,6 +10,15 @@ void setbit(UShort_t& x, UShort_t bit) {
 
 ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) : esGetTokens_{consumesCollector()}, noZSesGetTokens_{consumesCollector()} {
 
+  runOnParticleGun_          = ps.getParameter<bool>("runOnParticleGun");
+  puCollection_              = consumes<vector<PileupSummaryInfo> > (ps.getParameter<InputTag>("pileupCollection"));
+  newparticles_              = ps.getParameter< vector<int > >("newParticles");
+
+  //Important for MC gen level info
+  doGenParticles_            = ps.getParameter<bool>("doGenParticles");
+  generatorLabel_            = consumes<GenEventInfoProduct>        (ps.getParameter<InputTag>("generatorLabel"));
+  genParticlesCollection_    = consumes<vector<reco::GenParticle> > (ps.getParameter<InputTag>("genParticleSrc"));
+  
   vtxLabel_                  = consumes<reco::VertexCollection>        (ps.getParameter<InputTag>("VtxLabel"));
   rhoLabel_                  = consumes<double>                        (ps.getParameter<InputTag>("rhoLabel"));
   rhoCentralLabel_           = consumes<double>                        (ps.getParameter<InputTag>("rhoCentralLabel"));
@@ -31,6 +40,12 @@ ggNtuplizer::ggNtuplizer(const edm::ParameterSet& ps) : esGetTokens_{consumesCol
   branchesGlobalEvent(tree_);
   branchesElectrons(tree_);
   branchesHFElectrons(tree_);
+
+  if (doGenParticles_) {
+    branchesGenInfo(tree_, fs);
+    branchesGenPart(tree_);
+  }
+  
 }
 
 ggNtuplizer::~ggNtuplizer() {
@@ -54,6 +69,13 @@ void ggNtuplizer::analyze(const edm::Event& e, const edm::EventSetup& es) {
   fillGlobalEvent(e, es);
   fillElectrons(e, es, pv);
   fillHFElectrons(e);
+
+  //Gen level info
+  if (!e.isRealData()) {
+    fillGenInfo(e);
+    if (doGenParticles_)
+      fillGenPart(e);
+  }
 
   hEvents_->Fill(1.5);
   tree_->Fill();

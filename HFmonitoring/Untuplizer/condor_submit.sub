@@ -1,6 +1,6 @@
 era = $ENV(era)
 batch_name = Untuplizer_$(era) 
-executable = for_condor_xanadata.sh
+executable = for_condor_xana.sh
 # the 'infile' variable is set by the loop in the last line
 arguments  = $(ClusterID) $(ProcID) $(era) $(infile) $ENV(copydir)
 output     = $(era)/jobs/out/$(batch_name)_output.$(ClusterID).$(ProcID).out
@@ -10,9 +10,9 @@ log        = $(era)/jobs/log/$(batch_name)_output.$(ClusterID).$(ProcID).log
 # https://osg-htc.org/user-school-2017/materials/day2/files/osgus17-day2-part4-troubleshooting.pdf
 # get_env    = True
 +JobFlavour           = "longlunch"
-x509userproxy         = /afs/cern.ch/user/j/jnatoli/private/x509up_u92951
+x509userproxy         = /afs/cern.ch/user/n/naislam/private/x509up_u92951
 should_transfer_files = yes
-transfer_input_files  = $(era)/infiles/chunk_$(ProcID).txt, xanadata
+transfer_input_files  = $(era)/infiles/chunk_$(ProcID).txt, xana
 transfer_output_files = ""
 WhenToTransferOutput  = on_exit_or_evict
 queue infile matching files $(era)/infiles/*.txt

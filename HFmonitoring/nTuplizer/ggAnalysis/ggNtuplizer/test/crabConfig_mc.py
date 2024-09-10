@@ -26,8 +26,9 @@ if __name__ == '__main__':
     config.Data.unitsPerJob     = 10
     config.Data.ignoreLocality  = False
     config.Data.publication     = False
-    config.Site.storageSite     = 'T2_US_Wisconsin'
-
+   # config.Site.storageSite     = 'T2_US_Wisconsin'
+    config.Site.storageSite     = 'T3_CH_CERNBOX'
+   
     # Little sanity check...
     cmssw = os.getenv("CMSSW_BASE")
     print(f"Using: {cmssw}")
@@ -49,9 +50,10 @@ if __name__ == '__main__':
     # p.join()
 
     # Part 2
-    config.General.requestName = 'DYJetsToLL_M-50_Winter22_v2'
-    config.Data.inputDataset   = '/DYJetsToLL_M-50_TuneCP5_13p6TeV-madgraphMLM-pythia8/Run3Winter22MiniAOD-122X_mcRun3_2021_realistic_v9_ext2-v2/MINIAODSIM'
-    config.Data.outLFNDirBase  = '/store/user/jnatoli/2022HF/'
+    # 2024MC
+    config.General.requestName = 'DYJetsToLL_M-50_Winter24_v10-v3'
+    config.Data.inputDataset   = '/DYto2L-4Jets_MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v3/MINIAODSIM'
+    config.Data.outLFNDirBase  = '/store/user/naislam/HFCalibration/2024/Tuplizer/test/2024HF/MC'
     p = Process(target=submit, args=(config,))
     p.start()
     p.join()

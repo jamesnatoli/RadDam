@@ -12,5 +12,11 @@ ggNtuplizer = cms.EDAnalyzer("ggNtuplizer",
                              esReducedRecHitCollection = cms.InputTag("reducedEgamma", "reducedESRecHits"),
                              ak4JetSrc                 = cms.InputTag("slimmedJets"),
                              packedPFCands   = cms.InputTag("packedPFCandidates"),
+                             doGenParticles   = cms.bool(True),
+                             runOnParticleGun = cms.bool(False),
+                             genParticleSrc   = cms.InputTag("prunedGenParticles"),
+                             generatorLabel   = cms.InputTag("generator"),
+                             newParticles     = cms.vint32(4000011, 4000013, 1000006, 1000022, 1000024, 1000025),
+                             pileupCollection = cms.InputTag("addPileupInfo"),
 
 )

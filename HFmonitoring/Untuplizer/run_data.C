@@ -1,8 +1,9 @@
 { 
-  gROOT->LoadMacro("xAna_data.C+");
+  gROOT->LoadMacro("xAna.C+");
   
   const char* inpaths[] = {
-    "/hdfs/store/user/jnatoli/2022HF/EGamma/crab_EGamma_Run2022E/231003_154951/0000/ggTree_1.root"
+    "/afs/cern.ch/user/n/naislam/HFCaliberation/2024/test/CMSSW_14_0_11/src/RadDam/HFmonitoring/nTuplizer/ggAnalysis/ggNtuplizer/test/ggTree_mc.root"
+    //"/hdfs/store/user/jnatoli/2022HF/EGamma/crab_EGamma_Run2022E/231003_154951/0000/ggTree_1.root"
     // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022B_0000.root",
     // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022C_0000.root",
     // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022C_0001.root",
@@ -27,5 +28,5 @@
     // "file:/cms/heindl/2018/HF_calibration/EGamma/crab_EGamma_Run2018D/181127_130219/ggTree.root"
   };
   
-  xAna_data(inpaths, (sizeof(inpaths) / sizeof(inpaths[0])));
+  xAna(inpaths, (sizeof(inpaths) / sizeof(inpaths[0])));
 }
