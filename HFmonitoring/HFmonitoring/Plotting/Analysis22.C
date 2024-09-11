@@ -123,11 +123,11 @@ float getRaddamCorrection( float eta) {
   else if ((eta < -4.363) && (eta > -4.538))
     return RaddamCorrections[-38];
   else if ((eta < -4.538) && (eta > -4.716)) // 39
-    return RaddamCorrections[-39];
+    return 1;
   else if ((eta < -4.716) && (eta > -4.889)) // 40
-    return RaddamCorrections[-40];
+    return 1;
   else if ((eta < -4.889) && (eta > -5.191)) // 41
-    return RaddamCorrections[-41];
+    return 1;
 
   // Eta Plus
   if ((eta > 2.964) && (eta < 3.139)) 
@@ -150,11 +150,11 @@ float getRaddamCorrection( float eta) {
   else if ((eta > 4.363) && (eta < 4.538))
     return RaddamCorrections[38];
   else if ((eta > 4.538) && (eta < 4.716)) // 39
-    return RaddamCorrections[39];
+    return 1;
   else if ((eta > 4.716) && (eta < 4.889)) // 40
-    return RaddamCorrections[40];
+    return 1;
   else if ((eta > 4.889) && (eta < 5.191)) // 41
-    return RaddamCorrections[41];
+    return 1;
 
   std::cout << "** Danger, Will Robinson" << std::endl;
   return 1;
@@ -201,7 +201,7 @@ void Analysis22::Loop() {
   if (fChain == 0) return;
   
   // Always use PU, dummy
-  std::string year = "2024F";
+  std::string year = "2023postBPix";
   bool usePU       = false;
   bool useRaddam   = false;
   int numfactors   = 0; // Number of factors to check, set to zero if NO rederiving factors

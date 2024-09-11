@@ -3,16 +3,17 @@
 #include <boost/algorithm/string.hpp>
 #include "setTDRStyle.C"
 
-void MakePNGPlots22() {
-  std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+void MakePNGPlots18() {
   setTDRStyle();
+  TString figdir = "Figures18_PU/";
   TCanvas* canvas = new TCanvas("canvas");
-  // Make Changes Here
-  TString figdir = "Figures22FG_afterHFTiming_noPU_RaddCorr_testAgain/";
-  TString year = "2024";
-  TFile *fMC = new TFile("outplots/output_DYJetsToLL_M-50_Winter22_PLOTS_mc_noPU_test.root");
-  TFile *fData = new TFile("outplots/output_data_EGamma_Run2022FG_afterHFTiming_PLOTS_data_noPU_RaddCorr_testAgain.root");
-  
+  TFile *fMC = new TFile("outplots/outplots2018_mc_PU.root");
+  TFile *fData = new TFile("outplots/outplots2018_data_PU.root");
+
+  if ((!fMC->IsOpen()) || (!fData->IsOpen())) {
+    std::cout << "ERROR: File not found!!!" << std::endl;
+    return;
+  }
   
   TF1 *funcGaus = new TF1("fitGaus","gaus",0,100);
   funcGaus->SetLineWidth(2);
@@ -21,18 +22,6 @@ void MakePNGPlots22() {
   CMSlabel.SetTextFont(42);     
   CMSlabel.SetNDC();     
   CMSlabel.SetTextSize(0.04);
-
-  if ((!fData) || (!fData->IsOpen())) {
-    std::cout << "Data file didn't exist!" << std::endl;
-    return;
-  } else if ((!fMC) || (!fMC->IsOpen())){
-    std::cout << "MC file didn't exist!" << std::endl;
-    return;
-  }
-
-  std::cout << ">>> Figures Dirctory: " << figdir << std::endl;
-  std::cout << ">>> Input MC: " << fMC->GetName() << std::endl;
-  std::cout << ">>> Input Data: " << fData->GetName() << std::endl;
 		
   //Inv Mass
   TH1F *hMassMC = (TH1F*)fMC->Get("h_mass");
@@ -50,7 +39,7 @@ void MakePNGPlots22() {
   hMassMC->GetXaxis()->SetLabelSize(0.04);
   hMassMC->GetYaxis()->SetLabelSize(0.03);
   hMassMC->SetLineColor(kBlack);
-  hMassMC->Fit("fitGaus","RSQ");
+  hMassMC->Fit("fitGaus","RS");
   TString EntriesMassMC = TString::Format("Entries: %.0f", hMassMC->GetEntries());
   TString MeanMassMC = TString::Format("#mu = %.3f #pm %.3f", funcGaus->GetParameter(1), funcGaus->GetParError(1));
   TString SigmaMassMC = TString::Format("#sigma = %.3f #pm %.3f", funcGaus->GetParameter(2), funcGaus->GetParError(2));
@@ -82,7 +71,7 @@ void MakePNGPlots22() {
   hMassData->GetXaxis()->SetLabelSize(0.04);
   hMassData->GetYaxis()->SetLabelSize(0.03);
   hMassData->SetLineColor(kBlack);
-  hMassData->Fit("fitGaus","RSQ");
+  hMassData->Fit("fitGaus","RS");
   TString EntriesMassData = TString::Format("Entries: %.0f", hMassData->GetEntries());
   TString MeanMassData = TString::Format("#mu = %.3f #pm %.3f", funcGaus->GetParameter(1), funcGaus->GetParError(1));
   TString SigmaMassData = TString::Format("#sigma = %.3f #pm %.3f", funcGaus->GetParameter(2), funcGaus->GetParError(2));
@@ -90,7 +79,7 @@ void MakePNGPlots22() {
   TextMassData.SetTextFont(42);     
   TextMassData.SetNDC();     
   TextMassData.SetTextSize(0.03);
-  TextMassData.DrawLatex(0.6,0.86,"#scale[1.2]{#font[62]{Inv. mass (" + year + ")}}");
+  TextMassData.DrawLatex(0.6,0.86,"#scale[1.2]{#font[62]{Inv. mass (2018)}}");
   TextMassData.DrawLatex(0.6,0.81,EntriesMassData);
   TextMassData.DrawLatex(0.6,0.77,MeanMassData);
   TextMassData.DrawLatex(0.6,0.73,SigmaMassData);
@@ -98,7 +87,71 @@ void MakePNGPlots22() {
   canvas->Print( figdir + "InvMass_data.png");
   canvas->Clear();
   gStyle->SetPadLeftMargin(0.13);
-
+    
+  TH1F *hMassData_iEta33_before = (TH1F*)fData->Get("h_mass_iEta33_before");
+  funcGaus->SetRange(hMassData_iEta33_before->GetMaximumBin()+5,hMassData_iEta33_before->GetMaximumBin()+35);
+  hMassData_iEta33_before->GetXaxis()->SetTitleFont(42);
+  hMassData_iEta33_before->GetYaxis()->SetTitleFont(42);
+  hMassData_iEta33_before->GetXaxis()->SetTitleSize(0.04);
+  hMassData_iEta33_before->GetYaxis()->SetTitleSize(0.04);
+  hMassData_iEta33_before->GetXaxis()->SetTitleOffset(1.1);
+  hMassData_iEta33_before->GetYaxis()->SetTitleOffset(1.54);
+  hMassData_iEta33_before->GetXaxis()->SetLabelFont(42);
+  hMassData_iEta33_before->GetYaxis()->SetLabelFont(42);
+  hMassData_iEta33_before->GetXaxis()->SetLabelOffset(0.007);
+  hMassData_iEta33_before->GetYaxis()->SetLabelOffset(0.007);
+  hMassData_iEta33_before->GetXaxis()->SetLabelSize(0.04);
+  hMassData_iEta33_before->GetYaxis()->SetLabelSize(0.03);
+  hMassData_iEta33_before->SetLineColor(kBlack);
+  hMassData_iEta33_before->Fit("fitGaus","RS");
+  TString EntriesMassData_iEta33_before = TString::Format("Entries: %.0f", hMassData_iEta33_before->GetEntries());
+  TString MeanMassData_iEta33_before = TString::Format("#mu = %.3f #pm %.3f", funcGaus->GetParameter(1), funcGaus->GetParError(1));
+  TString SigmaMassData_iEta33_before = TString::Format("#sigma = %.3f #pm %.3f", funcGaus->GetParameter(2), funcGaus->GetParError(2));
+  TLatex TextMassData_iEta33_before = TLatex(); 
+  TextMassData_iEta33_before.SetTextFont(42);     
+  TextMassData_iEta33_before.SetNDC();     
+  TextMassData_iEta33_before.SetTextSize(0.03);
+  TextMassData_iEta33_before.DrawLatex(0.6,0.86,"#scale[1.2]{#font[62]{Inv. mass (2018)}}");
+  TextMassData_iEta33_before.DrawLatex(0.6,0.81,EntriesMassData_iEta33_before);
+  TextMassData_iEta33_before.DrawLatex(0.6,0.77,MeanMassData_iEta33_before);
+  TextMassData_iEta33_before.DrawLatex(0.6,0.73,SigmaMassData_iEta33_before);
+  CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
+  canvas->Print( figdir + "InvMass_data_iEta33_before.png");
+  canvas->Clear();
+  gStyle->SetPadLeftMargin(0.13);
+    
+  TH1F *hMassData_iEta33_after = (TH1F*)fData->Get("h_mass_iEta33_after");
+  funcGaus->SetRange(hMassData_iEta33_after->GetMaximumBin()+5,hMassData_iEta33_after->GetMaximumBin()+35);
+  hMassData_iEta33_after->GetXaxis()->SetTitleFont(42);
+  hMassData_iEta33_after->GetYaxis()->SetTitleFont(42);
+  hMassData_iEta33_after->GetXaxis()->SetTitleSize(0.04);
+  hMassData_iEta33_after->GetYaxis()->SetTitleSize(0.04);
+  hMassData_iEta33_after->GetXaxis()->SetTitleOffset(1.1);
+  hMassData_iEta33_after->GetYaxis()->SetTitleOffset(1.54);
+  hMassData_iEta33_after->GetXaxis()->SetLabelFont(42);
+  hMassData_iEta33_after->GetYaxis()->SetLabelFont(42);
+  hMassData_iEta33_after->GetXaxis()->SetLabelOffset(0.007);
+  hMassData_iEta33_after->GetYaxis()->SetLabelOffset(0.007);
+  hMassData_iEta33_after->GetXaxis()->SetLabelSize(0.04);
+  hMassData_iEta33_after->GetYaxis()->SetLabelSize(0.03);
+  hMassData_iEta33_after->SetLineColor(kBlack);
+  hMassData_iEta33_after->Fit("fitGaus","RS");
+  TString EntriesMassData_iEta33_after = TString::Format("Entries: %.0f", hMassData_iEta33_after->GetEntries());
+  TString MeanMassData_iEta33_after = TString::Format("#mu = %.3f #pm %.3f", funcGaus->GetParameter(1), funcGaus->GetParError(1));
+  TString SigmaMassData_iEta33_after = TString::Format("#sigma = %.3f #pm %.3f", funcGaus->GetParameter(2), funcGaus->GetParError(2));
+  TLatex TextMassData_iEta33_after = TLatex(); 
+  TextMassData_iEta33_after.SetTextFont(42);     
+  TextMassData_iEta33_after.SetNDC();     
+  TextMassData_iEta33_after.SetTextSize(0.03);
+  TextMassData_iEta33_after.DrawLatex(0.6,0.86,"#scale[1.2]{#font[62]{Inv. mass (2018)}}");
+  TextMassData_iEta33_after.DrawLatex(0.6,0.81,EntriesMassData_iEta33_after);
+  TextMassData_iEta33_after.DrawLatex(0.6,0.77,MeanMassData_iEta33_after);
+  TextMassData_iEta33_after.DrawLatex(0.6,0.73,SigmaMassData_iEta33_after);
+  CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
+  canvas->Print( figdir + "InvMass_data_iEta33_after.png");
+  canvas->Clear();
+  gStyle->SetPadLeftMargin(0.13);
+    
     
   TH1F *hLSRAtioData = (TH1F*)fData->Get("h_lsRatio");
   TH1F *hLSRAtioMC = (TH1F*)fMC->Get("h_lsRatio");
@@ -124,24 +177,25 @@ void MakePNGPlots22() {
   if (MC_maxDPhi > Data_maxDPhi) LSRAtioStack->SetMaximum(MC_maxDPhi);
   if (MC_maxDPhi < Data_maxDPhi) LSRAtioStack->SetMaximum(Data_maxDPhi);
   TLegend* legendLSRAtio = new TLegend(0.475,0.775,0.625,0.875,"","NDC");
-  legendLSRAtio->AddEntry(hLSRAtioData, year, "p");
+  legendLSRAtio->AddEntry(hLSRAtioData, "2018", "p");
   legendLSRAtio->AddEntry(hLSRAtioMC, "MC LO", "p");
   legendLSRAtio->SetBorderSize(0);
   legendLSRAtio->Draw();
   CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
+  // TString LSRAtioFitName = TString::Format( figdir + "lsRatio.png");
   TString LSRAtioFitName = TString::Format( "%slsRatio.png", figdir.Data());
   canvas->Print(LSRAtioFitName);
   canvas->Clear();
   
   canvas->SetLogy(0);
   
-  // Eta Loop
-  TH1F *hEtaMCAll = new TH1F("hEtaMCAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaPlusDataAll = new TH1F("hEtaPlusDataAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaMinusDataAll = new TH1F("hEtaMinusDataAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaWidthMCAll = new TH1F("hEtaWidthMCAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaWidthDataAll = new TH1F("hEtaWidthDataAll", "", 12, 29.5, 41.5);
-  for(int i = 30; i <= 41; ++i) {
+  //Eta 
+  TH1F *hEtaMCAll = new TH1F("hEtaMCAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaPlusDataAll = new TH1F("hEtaPlusDataAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaMinusDataAll = new TH1F("hEtaMinusDataAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaWidthMCAll = new TH1F("hEtaWidthMCAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaWidthDataAll = new TH1F("hEtaWidthDataAll", "", 10, 29.5, 39.5);
+  for(int i = 30; i <= 39; ++i) {
     TString EtaPlusNum = TString::Format("etaPlus%i", i);
     TString EtaPlusBin = TString::Format("#eta%i (HF+)", i);
     canvas->SetLogy(0);		
@@ -149,7 +203,7 @@ void MakePNGPlots22() {
     TH1F *hEtaPlusMC = (TH1F*)fMC->Get(EtaPlusNum);
     hEtaPlusMC->Draw();
     funcGaus->SetRange(hEtaPlusMC->GetMaximumBin()+5,hEtaPlusMC->GetMaximumBin()+35);
-    TFitResultPtr FitResultEtaPlusMC = hEtaPlusMC->Fit("fitGaus","RSQ");
+    TFitResultPtr FitResultEtaPlusMC = hEtaPlusMC->Fit("fitGaus","RS");
     double mcPlus = funcGaus->GetParameter(1);
     double mcPlusErr = funcGaus->GetParError(1);
     double mcWidthPlus = funcGaus->GetParameter(2);
@@ -179,7 +233,7 @@ void MakePNGPlots22() {
     TH1F *hEtaPlusData = (TH1F*)fData->Get(EtaPlusNum);
     hEtaPlusData->Draw();
     funcGaus->SetRange(hEtaPlusData->GetMaximumBin()+5,hEtaPlusData->GetMaximumBin()+35);
-    TFitResultPtr FitResultEtaPlusData = hEtaPlusData->Fit("fitGaus","RSQ");
+    TFitResultPtr FitResultEtaPlusData = hEtaPlusData->Fit("fitGaus","RS");
     double dataPlus = funcGaus->GetParameter(1);
     double dataPlusErr = funcGaus->GetParError(1);
     double dataWidthPlus = funcGaus->GetParameter(2);
@@ -193,7 +247,7 @@ void MakePNGPlots22() {
     TextEtaPlusData.SetTextFont(42);     
     TextEtaPlusData.SetNDC();     
     TextEtaPlusData.SetTextSize(0.02);
-    TextEtaPlusData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+EtaPlusBin+" ("+year+")}");
+    TextEtaPlusData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+EtaPlusBin+" (2018)}");
     TextEtaPlusData.DrawLatex(0.7,0.82,EntriesEtaPlusData);
     TextEtaPlusData.DrawLatex(0.7,0.79,MeanEtaPlusData);
     TextEtaPlusData.DrawLatex(0.7,0.76,SigmaEtaPlusData);
@@ -212,7 +266,7 @@ void MakePNGPlots22() {
     TH1F *hEtaMinusMC = (TH1F*)fMC->Get(EtaMinusNum);
     hEtaMinusMC->Draw();
     funcGaus->SetRange(hEtaMinusMC->GetMaximumBin()+5,hEtaMinusMC->GetMaximumBin()+35);
-    TFitResultPtr FitResultEtaMinusMC = hEtaMinusMC->Fit("fitGaus","RSQ");
+    TFitResultPtr FitResultEtaMinusMC = hEtaMinusMC->Fit("fitGaus","RS");
     double mcMinus = funcGaus->GetParameter(1);
     double mcMinusErr = funcGaus->GetParError(1);
     double mcWidthMinus = funcGaus->GetParameter(2);
@@ -242,7 +296,7 @@ void MakePNGPlots22() {
     TH1F *hEtaMinusData = (TH1F*)fData->Get(EtaMinusNum);
     hEtaMinusData->Draw();
     funcGaus->SetRange(hEtaMinusData->GetMaximumBin()+5,hEtaMinusData->GetMaximumBin()+35);
-    TFitResultPtr FitResultEtaMinusData = hEtaMinusData->Fit("fitGaus","RSQ");
+    TFitResultPtr FitResultEtaMinusData = hEtaMinusData->Fit("fitGaus","RS");
     double dataMinus = funcGaus->GetParameter(1);
     double dataMinusErr = funcGaus->GetParError(1);
     double dataWidthMinus = funcGaus->GetParameter(2);
@@ -256,7 +310,7 @@ void MakePNGPlots22() {
     TextEtaMinusData.SetTextFont(42);     
     TextEtaMinusData.SetNDC();     
     TextEtaMinusData.SetTextSize(0.02);
-    TextEtaMinusData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+EtaMinusBin+" ("+year+")}");
+    TextEtaMinusData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+EtaMinusBin+" (2018)}");
     TextEtaMinusData.DrawLatex(0.7,0.82,EntriesEtaMinusData);
     TextEtaMinusData.DrawLatex(0.7,0.79,MeanEtaMinusData);
     TextEtaMinusData.DrawLatex(0.7,0.76,SigmaEtaMinusData);
@@ -275,18 +329,16 @@ void MakePNGPlots22() {
     hEtaPlusDataAll->SetBinError(i-29, dataPlusErr);
     hEtaMinusDataAll->SetBinContent(i-29, dataMinus);
     hEtaMinusDataAll->SetBinError(i-29, dataMinusErr);
-    
+        
     hEtaWidthMCAll->SetBinContent(i-29, (mcWidthPlus+mcWidthMinus)*0.5);
     hEtaWidthDataAll->SetBinContent(i-29, (dataWidthPlus+dataWidthMinus)*0.5);
     hEtaWidthDataAll->SetBinError(i-29, (dataWidthPlusErr+dataWidthMinusErr)*0.5);
-    
+		
     canvas->SetLogy(0);
   } // end eta loop
-  // std::cout << "EXITING" << std::endl;
-  // return;
 	
   TF1 *fEta = new TF1("fEta","x",2.964,4.714);
-  TGaxis *axisEtaRMS = new TGaxis(29.5,30,41.5,30,"fEta",510,"-");
+  TGaxis *axisEtaRMS = new TGaxis(29.5,30,39.5,30,"fEta",510,"-");
   axisEtaRMS->SetLabelFont(42);
   axisEtaRMS->SetLabelSize(0.035);
   axisEtaRMS->SetTitleSize(0.035);
@@ -318,7 +370,7 @@ void MakePNGPlots22() {
   EtaStack->GetXaxis()->SetTitle("i#eta");
   EtaStack->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
   EtaStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEta = new TGaxis(29.5,100,41.5,100,"fEta",510,"-");
+  TGaxis *axisEta = new TGaxis(29.5,100,39.5,100,"fEta",510,"-");
   axisEta->SetLabelFont(42);
   axisEta->SetLabelSize(0.035);
   axisEta->SetTitleSize(0.05);
@@ -332,77 +384,15 @@ void MakePNGPlots22() {
   //TLegend* legendEta = new TLegend(0.63,0.65,0.83,0.85,"","NDC");
   TLegend* legendEta = new TLegend(0.63,0.15,0.83,0.30,"","NDC");
   legendEta->AddEntry(hEtaMCAll, "MC LO", "l");
-  legendEta->AddEntry(hEtaPlusDataAll, ""+year+" HF+", "ep");
-  legendEta->AddEntry(hEtaMinusDataAll, ""+year+" HF-", "ep");
+  legendEta->AddEntry(hEtaPlusDataAll, "2018 HF+", "ep");
+  legendEta->AddEntry(hEtaMinusDataAll, "2018 HF-", "ep");
   legendEta->SetBorderSize(0);
   legendEta->Draw();
   CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
   canvas->Print( figdir + "EtaFit.png");
   canvas->SaveAs( figdir + "EtaFit.C");
   canvas->Clear();
-
-  // Ratio EtaFit
-  TH1F* hEtaPRatio = (TH1F*)hEtaMCAll->Clone("pratio");
-  hEtaPRatio->SetMarkerStyle(20);
-  hEtaPRatio->SetMarkerSize(1);
-  hEtaPRatio->SetMarkerColor(kRed);
-  hEtaPRatio->SetLineColor(kRed);
-  hEtaPRatio->Divide( hEtaPlusDataAll);
-  hEtaPRatio->SetStats(0);
-  hEtaPRatio->Draw();
-
-  // Print out the ratios for Raddam.C
-  float etabin = 0;
-  float binval = 0;
-  std::cout << ">>> Eta PLUS Ratios " << std::endl;
-  for (unsigned int i = 0; i < hEtaPRatio->GetNbinsX(); ++i) {
-    etabin = hEtaPRatio->GetXaxis()->GetBinCenter(i);
-    binval = hEtaPRatio->GetBinContent(i);
-    std::cout << "{" << etabin << ", " << binval << "}," << std::endl;
-  }
-  
-  TH1F* hEtaMRatio = (TH1F*)hEtaMCAll->Clone("mratio");
-  hEtaMRatio->SetMarkerStyle(20);
-  hEtaMRatio->SetMarkerSize(1);
-  hEtaMRatio->SetMarkerColor(kBlue);
-  hEtaMRatio->SetLineColor(kBlue);
-  hEtaMRatio->Divide( hEtaMinusDataAll);
-
-  std::cout << ">>> Eta MINUS Ratios " << std::endl;
-  for (unsigned int i = 0; i < hEtaMRatio->GetNbinsX(); ++i) {
-    etabin = hEtaMRatio->GetXaxis()->GetBinCenter(i);
-    binval = hEtaMRatio->GetBinContent(i);
-    std::cout << "{-" << etabin << ", " << binval << "}," << std::endl;
-  }
-
-  THStack *EtaRatioStack = new THStack();
-  EtaRatioStack->Add(hEtaPRatio);
-  EtaRatioStack->Add(hEtaMRatio);
-  EtaRatioStack->Draw("nostackP9E1");  
-  EtaRatioStack->GetXaxis()->SetTitle("i#eta");
-  EtaRatioStack->GetYaxis()->SetTitle("MC / Data");
-  EtaRatioStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEtaRatio = new TGaxis(29.5,1.6,41.5,1.6,"fEta",510,"-");
-  axisEtaRatio->SetLabelFont(42);
-  axisEtaRatio->SetLabelSize(0.035);
-  axisEtaRatio->SetTitleSize(0.05);
-  axisEtaRatio->SetLabelOffset(0.0025);
-  axisEtaRatio->SetTitle("|#eta|");
-  axisEtaRatio->Draw();
-  EtaRatioStack->SetMinimum(0);
-  EtaRatioStack->SetMaximum(1.6);
-  hEtaMRatio->Draw("SAME P9E1");
-  hEtaMRatio->GetYaxis()->SetRangeUser(0,1.6);
-  TLegend* legendEtaRatio = new TLegend(0.2,0.2,0.5,0.3,"","NDC");
-  legendEtaRatio->AddEntry(hEtaPRatio, ""+year+" HF+ Ratio", "ep");
-  legendEtaRatio->AddEntry(hEtaMRatio, ""+year+" HF- Ratio", "ep");
-  legendEtaRatio->SetBorderSize(0);
-  legendEtaRatio->Draw();
-  CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
-  canvas->Print( figdir + "EtaFitRatio.png");
-  canvas->SaveAs( figdir + "EtaFitRatio.C");
-  canvas->Clear();
-
+    
   hEtaWidthMCAll->SetLineWidth(2);
   hEtaWidthMCAll->SetLineStyle(1);
   hEtaWidthMCAll->SetLineColor(kBlack);
@@ -420,7 +410,7 @@ void MakePNGPlots22() {
   EtaWidthStack->GetXaxis()->SetTitle("i#eta");
   EtaWidthStack->GetYaxis()->SetTitle("Width #sigma of M_{e, hf}^{fit} (GeV)");
   EtaWidthStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEtaWidth = new TGaxis(29.5,20,41.5,20,"fEta",510,"-");
+  TGaxis *axisEtaWidth = new TGaxis(29.5,20,39.5,20,"fEta",510,"-");
   axisEtaWidth->SetLabelFont(42);
   axisEtaWidth->SetLabelSize(0.035);
   axisEtaWidth->SetTitleSize(0.05);
@@ -434,14 +424,14 @@ void MakePNGPlots22() {
   //TLegend* legendEtaWidth = new TLegend(0.63,0.65,0.83,0.85,"","NDC");
   TLegend* legendEtaWidth = new TLegend(0.23,0.65,0.43,0.85,"","NDC");
   legendEtaWidth->AddEntry(hEtaWidthMCAll, "MC LO", "l");
-  legendEtaWidth->AddEntry(hEtaWidthDataAll, ""+year+" HF", "ep");
+  legendEtaWidth->AddEntry(hEtaWidthDataAll, "2018 HF", "ep");
   legendEtaWidth->SetBorderSize(0);
   legendEtaWidth->Draw();
   CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
   canvas->Print( figdir + "EtaWidthFit.png");
   canvas->Clear();
 	
-  // Phi Loop
+  //Phi 
   TH1F *hPhiMCAll = new TH1F("hPhiMCAll", "", 71, 0.5, 71.5);
   TH1F *hPhiDataAll = new TH1F("hPhiDataAll", "", 71, 0.5, 71.5);
   for(int i = 1; i <= 71; i+=2) {
@@ -451,7 +441,7 @@ void MakePNGPlots22() {
 				
     TH1F *hPhiMC = (TH1F*)fMC->Get(PhiNum);
     funcGaus->SetRange(hPhiMC->GetMaximumBin()+5,hPhiMC->GetMaximumBin()+35);
-    TFitResultPtr FitResultPhiMC = hPhiMC->Fit("fitGaus","RSQ");		
+    TFitResultPtr FitResultPhiMC = hPhiMC->Fit("fitGaus","RS");		
     hPhiMC->Draw();
     hPhiMCAll->SetBinContent(i, funcGaus->GetParameter(1));
     hPhiMCAll->SetBinError(i, funcGaus->GetParError(1));
@@ -479,7 +469,7 @@ void MakePNGPlots22() {
 		
     TH1F *hPhiData = (TH1F*)fData->Get(PhiNum);
     funcGaus->SetRange(hPhiData->GetMaximumBin()+5,hPhiData->GetMaximumBin()+35);
-    TFitResultPtr FitResultPhiData = hPhiData->Fit("fitGaus","RSQ");		
+    TFitResultPtr FitResultPhiData = hPhiData->Fit("fitGaus","RS");		
     hPhiData->Draw();
     hPhiDataAll->SetBinContent(i, funcGaus->GetParameter(1));
     hPhiDataAll->SetBinError(i, funcGaus->GetParError(1));
@@ -492,7 +482,7 @@ void MakePNGPlots22() {
     TextPhiData.SetTextFont(42);     
     TextPhiData.SetNDC();     
     TextPhiData.SetTextSize(0.02);
-    TextPhiData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+PhiBin+" ("+year+")}");
+    TextPhiData.DrawLatex(0.7,0.86,"#scale[1.4]{i"+PhiBin+" (2018)}");
     TextPhiData.DrawLatex(0.7,0.82,EntriesPhiData);
     TextPhiData.DrawLatex(0.7,0.79,MeanPhiData);
     TextPhiData.DrawLatex(0.7,0.76,SigmaPhiData);
@@ -506,7 +496,7 @@ void MakePNGPlots22() {
     canvas->Clear();
 		
     canvas->SetLogy(0);
-  } // end phi loop
+  }
 	
   hPhiMCAll->SetMarkerStyle(20);
   hPhiMCAll->SetMarkerSize(0.75);
@@ -530,9 +520,9 @@ void MakePNGPlots22() {
   PhiStack->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
   PhiStack->SetMinimum(60);
   PhiStack->SetMaximum(90);
-  TLegend* legendPhi = new TLegend(0.2,0.2,0.35,0.3,"","NDC");
+  TLegend* legendPhi = new TLegend(0.25,0.2,0.4,0.3,"","NDC");
   legendPhi->AddEntry(hPhiMCAll, "MC LO", "ep");
-  legendPhi->AddEntry(hPhiDataAll, year, "ep");
+  legendPhi->AddEntry(hPhiDataAll, "2018", "ep");
   legendPhi->SetLineColor(kWhite);
   legendPhi->SetBorderSize(0);
   legendPhi->Draw();
@@ -568,7 +558,7 @@ void MakePNGPlots22() {
     TH1F *hPUmc = (TH1F*)fMC->Get(PUnum);
     if (hPUmc->GetEntries() > 0) {
       funcGaus->SetRange(hPUmc->GetMaximumBin()+5,hPUmc->GetMaximumBin()+35);
-      TFitResultPtr FitResultPUmc = hPUmc->Fit("fitGaus","RSQ");		
+      TFitResultPtr FitResultPUmc = hPUmc->Fit("fitGaus","RS");		
       hPUmcFit->SetBinContent(i, funcGaus->GetParameter(1));
       hPUmcFit->SetBinError(i, funcGaus->GetParError(1));
       TString EntriesPUmc = TString::Format("Entries: %.0f", hPUmc->GetEntries());
@@ -596,7 +586,7 @@ void MakePNGPlots22() {
     TH1F *hPUdata = (TH1F*)fData->Get(PUnum);
     if (hPUdata->GetEntries() > 0) {
       funcGaus->SetRange(hPUdata->GetMaximumBin()+5,hPUdata->GetMaximumBin()+35);
-      TFitResultPtr FitResultPUdata = hPUdata->Fit("fitGaus","RSQ");		
+      TFitResultPtr FitResultPUdata = hPUdata->Fit("fitGaus","RS");		
       hPUdataFit->SetBinContent(i, funcGaus->GetParameter(1));
       hPUdataFit->SetBinError(i, funcGaus->GetParError(1));
       TString EntriesPUdata = TString::Format("Entries: %.0f", hPUdata->GetEntries());
@@ -608,7 +598,7 @@ void MakePNGPlots22() {
       TextPUdata.SetTextFont(42);     
       TextPUdata.SetNDC();     
       TextPUdata.SetTextSize(0.02);
-      TextPUdata.DrawLatex(0.7,0.86,"#scale[1.4]{"+PUbin[i-1]+" ("+year+")}");
+      TextPUdata.DrawLatex(0.7,0.86,"#scale[1.4]{"+PUbin[i-1]+" (2018)}");
       TextPUdata.DrawLatex(0.7,0.82,EntriesPUdata);
       TextPUdata.DrawLatex(0.7,0.79,MeanPUdata);
       TextPUdata.DrawLatex(0.7,0.76,SigmaPUdata);
@@ -622,7 +612,7 @@ void MakePNGPlots22() {
       canvas->Clear();}
 		
     canvas->SetLogy(0);
-  } // end PU loop
+  } // end PU Loop
 	
   hPUmcFit->SetMarkerStyle(21);
   hPUmcFit->SetMarkerSize(1);
@@ -632,7 +622,7 @@ void MakePNGPlots22() {
   hPUmcFit->GetYaxis()->SetRangeUser(50,100);
   hPUmcFit->GetXaxis()->SetTitle("nVtx");
   hPUmcFit->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
-  hPUmcFit->Fit("fitLinMC","RQ");
+  hPUmcFit->Fit("fitLinMC","R");
   TString LinFitMC = TString::Format("MC LO: %.3f + %.3f #times nVtx", funcLinMC->GetParameter(0), funcLinMC->GetParameter(1));
   if (funcLinMC->GetParameter(1) < 0) LinFitMC = TString::Format("MC LO: %.3f - %.3f #times nVtx", funcLinMC->GetParameter(0), (-1)*funcLinMC->GetParameter(1));
 	
@@ -644,11 +634,11 @@ void MakePNGPlots22() {
   hPUdataFit->GetYaxis()->SetRangeUser(50,100);
   hPUdataFit->GetXaxis()->SetTitle("nVtx");
   hPUdataFit->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
-  hPUdataFit->Fit("fitLinData","RQ");
-  TString LinFitData = TString::Format(year+": %.3f + %.3f #times nVtx", funcLinData->GetParameter(0), funcLinData->GetParameter(1));
-  if (funcLinData->GetParameter(1) < 0) LinFitData = TString::Format(year+": %.3f - %.3f #times nVtx", funcLinData->GetParameter(0), (-1)*funcLinData->GetParameter(1));
+  hPUdataFit->Fit("fitLinData","R");
+  TString LinFitData = TString::Format("2018: %.3f + %.3f #times nVtx", funcLinData->GetParameter(0), funcLinData->GetParameter(1));
+  if (funcLinData->GetParameter(1) < 0) LinFitData = TString::Format("2018: %.3f - %.3f #times nVtx", funcLinData->GetParameter(0), (-1)*funcLinData->GetParameter(1));
 	
-  THStack *PUStack = new THStack("PUstack", "");
+  THStack *PUStack = new THStack();
   PUStack->Add(hPUmcFit);
   PUStack->Add(hPUdataFit);
   PUStack->Draw("nostackP9E1");
@@ -656,7 +646,7 @@ void MakePNGPlots22() {
   PUStack->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
   PUStack->SetMinimum(50);
   PUStack->SetMaximum(100);
-  TLegend* legendPU = new TLegend(0.4,0.2,0.85,0.5,"Pile-Up","NDC");
+  TLegend* legendPU = new TLegend(0.4,0.6,0.85,0.85,"Pile-Up","NDC");
   legendPU->AddEntry(hPUmcFit, LinFitMC, "ep");
   legendPU->AddEntry(hPUdataFit, LinFitData, "ep");
   legendPU->SetBorderSize(0);
@@ -665,21 +655,23 @@ void MakePNGPlots22() {
   canvas->Print( figdir + "PUFit.png");
   canvas->SaveAs( figdir + "PUFit.C");
   canvas->Clear();
+  std::cout << "exiting..." << std::endl;
+  return;
 
-  // Memory leaks on 'hEtaPhiFitDataAll' and 'hEtaPhiFitMCAll'
-  TH1F *hEtaPhiFitDataAll = new TH1F("hEtaPhiFitDataAll", "", 71, 0.5, 71.5);
-  TH1F *hEtaPhiFitMCAll = new TH1F("hEtaPhiFitMCAll", "", 71, 0.5, 71.5);
   TString EtaRange[12] = {"i#eta30","i#eta31","i#eta32","i#eta33","i#eta34","i#eta35","i#eta36","i#eta37","i#eta38","i#eta39","i#eta40","i#eta41"};
-  for (int e = 30; e <= 41; ++e) {
+  for (int e = 30; e <= 41; ++e) {	
+        
+    TH1F *hEtaPhiFitDataAll = new TH1F("hEtaPhiFitDataAll", "", 71, 0.5, 71.5);
+    TH1F *hEtaPhiFitMCAll = new TH1F("hEtaPhiFitMCAll", "", 71, 0.5, 71.5);
     int count = 0;
     for(int i = 1; i <= 71; i+=2) {
-      
+			
       if(e >= 40) i+=2;
-      
+				
       TString EtaPhiFitNum = TString::Format("eta%iphi%i", e, i);
       TH1F *hEtaPhiFitData = (TH1F*)fData->Get(EtaPhiFitNum);
       funcGaus->SetRange(hEtaPhiFitData->GetMaximumBin()+10,hEtaPhiFitData->GetMaximumBin()+30);
-      hEtaPhiFitData->Fit("fitGaus","RSQ");
+      hEtaPhiFitData->Fit("fitGaus","RS");
       hEtaPhiFitData->Draw();
       hEtaPhiFitDataAll->SetBinContent(i, funcGaus->GetParameter(1));
       hEtaPhiFitDataAll->SetBinError(i, funcGaus->GetParError(1));
@@ -687,7 +679,7 @@ void MakePNGPlots22() {
 				
       TH1F *hEtaPhiFitMC = (TH1F*)fMC->Get(EtaPhiFitNum);
       funcGaus->SetRange(hEtaPhiFitMC->GetMaximumBin()+10,hEtaPhiFitMC->GetMaximumBin()+30);
-      hEtaPhiFitMC->Fit("fitGaus","RSQ");
+      hEtaPhiFitMC->Fit("fitGaus","RS");
       hEtaPhiFitMC->Draw();
       hEtaPhiFitMCAll->SetBinContent(i, funcGaus->GetParameter(1));
       hEtaPhiFitMCAll->SetBinError(i, funcGaus->GetParError(1));
@@ -718,7 +710,7 @@ void MakePNGPlots22() {
     EtaPhiFitStack->SetMinimum(50);
     EtaPhiFitStack->SetMaximum(100);
     TLegend* legendEtaPhiFit = new TLegend(0.25,0.75,0.4,0.85,EtaRange[e-30],"NDC");
-    legendEtaPhiFit->AddEntry(hEtaPhiFitDataAll, year, "ep");
+    legendEtaPhiFit->AddEntry(hEtaPhiFitDataAll, "2018", "ep");
     legendEtaPhiFit->AddEntry(hEtaPhiFitMCAll, "MC LO", "ep");
     legendEtaPhiFit->SetBorderSize(0);
     legendEtaPhiFit->Draw();
@@ -752,7 +744,7 @@ void MakePNGPlots22() {
     if (MC_maxPU > Data_maxPU) EtaPUStack->SetMaximum(MC_maxPU);
     if (MC_maxPU < Data_maxPU) EtaPUStack->SetMaximum(Data_maxPU);
     TLegend* legendEtaPU = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaPU->AddEntry(hEtaPUData, year, "p");
+    legendEtaPU->AddEntry(hEtaPUData, "2018", "p");
     legendEtaPU->AddEntry(hEtaPUMC, "MC LO", "p");
     legendEtaPU->SetBorderSize(0);
     legendEtaPU->Draw();
@@ -786,7 +778,7 @@ void MakePNGPlots22() {
     if (MC_maxPhi > Data_maxPhi) EtaPhiStack->SetMaximum(MC_maxPhi);
     if (MC_maxPhi < Data_maxPhi) EtaPhiStack->SetMaximum(Data_maxPhi);
     TLegend* legendEtaPhi = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaPhi->AddEntry(hEtaPhiData, year, "p");
+    legendEtaPhi->AddEntry(hEtaPhiData, "2018", "p");
     legendEtaPhi->AddEntry(hEtaPhiMC, "MC LO", "p");
     legendEtaPhi->SetBorderSize(0);
     legendEtaPhi->Draw();
@@ -820,7 +812,7 @@ void MakePNGPlots22() {
     if (MC_maxPhiEE > Data_maxPhiEE) EtaPhiEEStack->SetMaximum(MC_maxPhiEE);
     if (MC_maxPhiEE < Data_maxPhiEE) EtaPhiEEStack->SetMaximum(Data_maxPhiEE);
     TLegend* legendEtaPhiEE = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaPhiEE->AddEntry(hEtaPhiEEData, year, "p");
+    legendEtaPhiEE->AddEntry(hEtaPhiEEData, "2018", "p");
     legendEtaPhiEE->AddEntry(hEtaPhiEEMC, "MC LO", "p");
     legendEtaPhiEE->SetBorderSize(0);
     legendEtaPhiEE->Draw();
@@ -854,7 +846,7 @@ void MakePNGPlots22() {
     if (MC_maxEtaEE > Data_maxEtaEE) EtaEtaEEStack->SetMaximum(MC_maxEtaEE);
     if (MC_maxEtaEE < Data_maxEtaEE) EtaEtaEEStack->SetMaximum(Data_maxEtaEE);
     TLegend* legendEtaEtaEE = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaEtaEE->AddEntry(hEtaEtaEEData, year, "p");
+    legendEtaEtaEE->AddEntry(hEtaEtaEEData, "2018", "p");
     legendEtaEtaEE->AddEntry(hEtaEtaEEMC, "MC LO", "p");
     legendEtaEtaEE->SetBorderSize(0);
     legendEtaEtaEE->Draw();
@@ -888,7 +880,7 @@ void MakePNGPlots22() {
     if (MC_maxDPhi > Data_maxDPhi) EtaDPhiStack->SetMaximum(MC_maxDPhi);
     if (MC_maxDPhi < Data_maxDPhi) EtaDPhiStack->SetMaximum(Data_maxDPhi);
     TLegend* legendEtaDPhi = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaDPhi->AddEntry(hEtaDPhiData, year, "p");
+    legendEtaDPhi->AddEntry(hEtaDPhiData, "2018", "p");
     legendEtaDPhi->AddEntry(hEtaDPhiMC, "MC LO", "p");
     legendEtaDPhi->SetBorderSize(0);
     legendEtaDPhi->Draw();
@@ -922,7 +914,7 @@ void MakePNGPlots22() {
     if (MC_maxEn > Data_maxEn) EtaEnStack->SetMaximum(MC_maxEn);
     if (MC_maxEn < Data_maxEn) EtaEnStack->SetMaximum(Data_maxEn);
     TLegend* legendEtaEn = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaEn->AddEntry(hEtaEnData, year, "p");
+    legendEtaEn->AddEntry(hEtaEnData, "2018", "p");
     legendEtaEn->AddEntry(hEtaEnMC, "MC LO", "p");
     legendEtaEn->SetBorderSize(0);
     legendEtaEn->Draw();
@@ -956,7 +948,7 @@ void MakePNGPlots22() {
     if (MC_maxEnEE > Data_maxEnEE) EtaEnEEStack->SetMaximum(MC_maxEnEE);
     if (MC_maxEnEE < Data_maxEnEE) EtaEnEEStack->SetMaximum(Data_maxEnEE);
     TLegend* legendEtaEnEE = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEtaEnEE->AddEntry(hEtaEnEEData, year, "p");
+    legendEtaEnEE->AddEntry(hEtaEnEEData, "2018", "p");
     legendEtaEnEE->AddEntry(hEtaEnEEMC, "MC LO", "p");
     legendEtaEnEE->SetBorderSize(0);
     legendEtaEnEE->Draw();
@@ -990,7 +982,7 @@ void MakePNGPlots22() {
     if (MC_max_lsRatio > Data_max_lsRatio) Eta_lsRatioStack->SetMaximum(MC_max_lsRatio);
     if (MC_max_lsRatio < Data_max_lsRatio) Eta_lsRatioStack->SetMaximum(Data_max_lsRatio);
     TLegend* legendEta_lsRatio = new TLegend(0.475,0.775,0.625,0.875,EtaRange[e-30],"NDC");
-    legendEta_lsRatio->AddEntry(hEta_lsRatioData, year, "p");
+    legendEta_lsRatio->AddEntry(hEta_lsRatioData, "2018", "p");
     legendEta_lsRatio->AddEntry(hEta_lsRatioMC, "MC LO", "p");
     legendEta_lsRatio->SetBorderSize(0);
     legendEta_lsRatio->Draw();
@@ -998,10 +990,7 @@ void MakePNGPlots22() {
     TString Eta_lsRatioFitName = TString::Format( figdir + "EtaBin/Eta%ilsRatio.png", e);
     canvas->Print(Eta_lsRatioFitName);
     canvas->Clear();
-
-    hEtaPhiFitDataAll->Reset();
-    hEtaPhiFitMCAll->Reset();
-  } // end etaphi loop
+  }
 	
   //Run Data
   /*TH1F *hRunData = new TH1F("hRunData", "", 5, 0, 5);
@@ -1010,7 +999,7 @@ void MakePNGPlots22() {
     for(int i = 1; i <= 5; ++i) {
     TH1F *hRun = (TH1F*)fData->Get(RunName[i-1]);
     funcGaus->SetRange(hRun->GetMaximumBin()+5,hRun->GetMaximumBin()+35);
-    TFitResultPtr FitResultRunData = hRun->Fit("fitGaus","RSQ");
+    TFitResultPtr FitResultRunData = hRun->Fit("fitGaus","RS");
     hRunData->SetBinContent(i, funcGaus->GetParameter(1));
     hRunData->SetBinError(i, funcGaus->GetParError(1));
     hRunData->GetXaxis()->SetBinLabel(i,RunLabel[i-1]);		
@@ -1048,14 +1037,11 @@ void MakePNGPlots22() {
     hRunData->SetMinimum(65);
     hRunData->SetMaximum(85);
     TLegend* legendRun = new TLegend(0.7,0.7,0.85,0.85,"","NDC");
-    legendRun->AddEntry(hRunData, year, "ep");
+    legendRun->AddEntry(hRunData, "2018", "ep");
     legendRun->SetBorderSize(0);
     legendRun->Draw();
     CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
     canvas->Print( figdir + "Run.png");
     canvas->Clear();*/
-
-  // std::chrono::time_point<std::chrono::high_resolution_clock> end = std::chrono::high_resolution_clock::now();
-  std::cout << "Finished in " << round(std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count()) << " seconds" << std::endl;
-  std::cout << "All Done!" << std::endl;
+	
 }

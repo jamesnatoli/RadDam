@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     # Part 2
     # 2024MC
-    config.General.requestName = 'DYJetsToLL_M-50_Winter24_v10-v3_v2'
+    config.General.requestName = 'DYJetsToLL_M-50_Winter24_v10-v3_v1'
     config.Data.inputDataset   = '/DYto2L-4Jets_MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v3/MINIAODSIM'
     config.Data.outLFNDirBase  = '/store/user/naislam/HFCalibration/2024/Tuplizer/test/2024HF/MC'
     p = Process(target=submit, args=(config,))

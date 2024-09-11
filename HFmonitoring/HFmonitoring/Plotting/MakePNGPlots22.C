@@ -9,11 +9,13 @@ void MakePNGPlots22() {
   TCanvas* canvas = new TCanvas("canvas");
   // Make Changes Here
   TString figdir = "Figures22FG_afterHFTiming_noPU_RaddCorr_testAgain/";
-  TString year = "2024";
+  TString year = "2022";
   TFile *fMC = new TFile("outplots/output_DYJetsToLL_M-50_Winter22_PLOTS_mc_noPU_test.root");
   TFile *fData = new TFile("outplots/output_data_EGamma_Run2022FG_afterHFTiming_PLOTS_data_noPU_RaddCorr_testAgain.root");
   
-  
+  // TFile *fMC = new TFile("outplots/output_MC_DYto2L-4Jets_MLL-50_Winter23_PLOTS_mc_noPU_test.root");
+  // TFile *fData = new TFile("outplots/output_data_EGamma_Run2023D_BPix_PLOTS_data_noPU_RaddCorr_testOriginalRatio.root");
+
   TF1 *funcGaus = new TF1("fitGaus","gaus",0,100);
   funcGaus->SetLineWidth(2);
   canvas->SetLogy(0);
@@ -136,12 +138,12 @@ void MakePNGPlots22() {
   canvas->SetLogy(0);
   
   // Eta Loop
-  TH1F *hEtaMCAll = new TH1F("hEtaMCAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaPlusDataAll = new TH1F("hEtaPlusDataAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaMinusDataAll = new TH1F("hEtaMinusDataAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaWidthMCAll = new TH1F("hEtaWidthMCAll", "", 12, 29.5, 41.5);
-  TH1F *hEtaWidthDataAll = new TH1F("hEtaWidthDataAll", "", 12, 29.5, 41.5);
-  for(int i = 30; i <= 41; ++i) {
+  TH1F *hEtaMCAll = new TH1F("hEtaMCAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaPlusDataAll = new TH1F("hEtaPlusDataAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaMinusDataAll = new TH1F("hEtaMinusDataAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaWidthMCAll = new TH1F("hEtaWidthMCAll", "", 10, 29.5, 39.5);
+  TH1F *hEtaWidthDataAll = new TH1F("hEtaWidthDataAll", "", 10, 29.5, 39.5);
+  for(int i = 30; i <= 39; ++i) {
     TString EtaPlusNum = TString::Format("etaPlus%i", i);
     TString EtaPlusBin = TString::Format("#eta%i (HF+)", i);
     canvas->SetLogy(0);		
@@ -286,7 +288,7 @@ void MakePNGPlots22() {
   // return;
 	
   TF1 *fEta = new TF1("fEta","x",2.964,4.714);
-  TGaxis *axisEtaRMS = new TGaxis(29.5,30,41.5,30,"fEta",510,"-");
+  TGaxis *axisEtaRMS = new TGaxis(29.5,30,39.5,30,"fEta",510,"-");
   axisEtaRMS->SetLabelFont(42);
   axisEtaRMS->SetLabelSize(0.035);
   axisEtaRMS->SetTitleSize(0.035);
@@ -318,7 +320,7 @@ void MakePNGPlots22() {
   EtaStack->GetXaxis()->SetTitle("i#eta");
   EtaStack->GetYaxis()->SetTitle("M_{e, hf}^{fit} (GeV)");
   EtaStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEta = new TGaxis(29.5,100,41.5,100,"fEta",510,"-");
+  TGaxis *axisEta = new TGaxis(29.5,100,39.5,100,"fEta",510,"-");
   axisEta->SetLabelFont(42);
   axisEta->SetLabelSize(0.035);
   axisEta->SetTitleSize(0.05);
@@ -382,7 +384,7 @@ void MakePNGPlots22() {
   EtaRatioStack->GetXaxis()->SetTitle("i#eta");
   EtaRatioStack->GetYaxis()->SetTitle("MC / Data");
   EtaRatioStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEtaRatio = new TGaxis(29.5,1.6,41.5,1.6,"fEta",510,"-");
+  TGaxis *axisEtaRatio = new TGaxis(29.5,1.6,39.5,1.6,"fEta",510,"-");
   axisEtaRatio->SetLabelFont(42);
   axisEtaRatio->SetLabelSize(0.035);
   axisEtaRatio->SetTitleSize(0.05);
@@ -420,7 +422,7 @@ void MakePNGPlots22() {
   EtaWidthStack->GetXaxis()->SetTitle("i#eta");
   EtaWidthStack->GetYaxis()->SetTitle("Width #sigma of M_{e, hf}^{fit} (GeV)");
   EtaWidthStack->GetYaxis()->SetTitleOffset(1.54);
-  TGaxis *axisEtaWidth = new TGaxis(29.5,20,41.5,20,"fEta",510,"-");
+  TGaxis *axisEtaWidth = new TGaxis(29.5,20,39.5,20,"fEta",510,"-");
   axisEtaWidth->SetLabelFont(42);
   axisEtaWidth->SetLabelSize(0.035);
   axisEtaWidth->SetTitleSize(0.05);
