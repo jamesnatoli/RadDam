@@ -74,7 +74,7 @@ void xAna( TreeReader* pdata) {
   tree->Branch("mc_eta",     &mc_eta);
   tree->Branch("mc_phi",     &mc_phi);
 
-  bool condor = false;
+  bool condor = true;
   bool isMC = true;
   
   Long64_t nev = data.GetEntriesFast();
@@ -82,6 +82,7 @@ void xAna( TreeReader* pdata) {
   std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
   for (Long64_t ev = 0; ev < nev; ++ev) {
     //for (Long64_t ev = 0; ev < 100000; ++ev) {
+    //std::cout << "Processing event " << ev << " out of " << nev << std::endl;
     data.GetEntry(ev);    
     
     vector<TLorentzVector> genElectrons;
@@ -91,19 +92,23 @@ void xAna( TreeReader* pdata) {
     mc_eta.clear();
     mc_phi.clear();
 
+    //std::cout << "Before isMC block" << std::endl;
     if ( isMC ) {
       nmc = data.GetInt("nMC");
+      if ( nmc == 0 ) continue;
       Int_t*   mcPID       = data.GetPtrInt("mcPID");
       Int_t*   mcParentage = data.GetPtrInt("mcParentage");
       Float_t* mcPt        = data.GetPtrFloat("mcPt");
       Float_t* mcEta       = data.GetPtrFloat("mcEta");
       Float_t* mcPhi       = data.GetPtrFloat("mcPhi");
       Int_t*   mcStatus    = data.GetPtrInt("mcStatus");
-      
+
+      //cout << nmc << endl;
       for(int i = 0; i != nmc; ++i) {
-	//mc_pt.push_back(mcPt[i]);
-	//mc_eta.push_back(mcEta[i]);
-	//mc_phi.push_back(mcPhi[i]);
+	//cout << i << " out of " << nmc << "\t" << mcPID[i] << "\t" << mcStatus[i] << endl;
+	//cout << "Parentage " << "\t" << mcParentage[i] << endl;
+	//cout << mcPt[i] << "\t" << mcEta[i] << "\t" << mcPhi[i] << endl;
+	
 	if ( abs(mcPID[i]) == 11 && mcStatus[i] == 1 ) {
 	  bool z = (mcParentage[i] & (1 << 3)) > 0;
 	  if ( z ) {
@@ -116,12 +121,14 @@ void xAna( TreeReader* pdata) {
       if ( nmc != 0 && genElectrons.size() != 2 ) {
       	continue;
       }
-      mc_pt.push_back(mcPt[0]);
-      mc_pt.push_back(mcPt[1]);
-      mc_eta.push_back(mcEta[0]);
-      mc_eta.push_back(mcEta[1]);
-      mc_eta.push_back(mcPhi[0]);
-      mc_eta.push_back(mcPhi[1]);
+
+      mc_pt.push_back((genElectrons[0]).Pt());
+      mc_pt.push_back((genElectrons[1]).Pt());
+      mc_phi.push_back((genElectrons[0]).Phi());
+      mc_phi.push_back((genElectrons[1]).Phi());
+      mc_eta.push_back((genElectrons[0]).Eta());
+      mc_eta.push_back((genElectrons[1]).Eta());
+
     }
 
     //cout << "Passed MC block"<<endl;
@@ -144,18 +151,13 @@ void xAna( TreeReader* pdata) {
     hf_hcal.clear();
     hf_match.clear();
 
-    //nmc = 0;
-    //mc_pt.clear();
-    //mc_eta.clear();
-    //mc_phi.clear();
-
     if (!condor)
-      progressBar( ev, nev, start);
-    // if ( ev%100000 == 0 ) cout << "Processed: " << ev
-    //                            << " / " << nev
-    //                            << " (" << (100.0 * ev / nev)
-    //                            << "%)"
-    //                            << endl;
+     progressBar( ev, nev, start);
+     if ( ev%100000 == 0 ) cout << "Processed: " << ev
+                                << " / " << nev
+                                << " (" << (100.0 * ev / nev)
+                                << "%)"
+                                << endl;
     
     //cout << 1 <<endl;
     Int_t nHFEle = 0;
@@ -208,12 +210,12 @@ void xAna( TreeReader* pdata) {
 	else            hf_match.push_back(-1);
       } else {
 	hf_match.push_back(-2);
-      } // if ( isMC )
+      }
       ++nhf;
       //cout << "2-4" << endl;
     } // for( nHFEle)
     
-    // cout << "Passed HF block" <<endl;
+    //cout << "Passed HF block" <<endl;
     //cout << "3" << endl;
     
     Int_t nEle = 0;
@@ -316,22 +318,24 @@ void xAna( TreeReader* pdata) {
       ele_mediumID.push_back(isMediumEle);
 
     } // for (int iele...
-    //cout << "Passed Ele block" << endl;
+    //cout << "Passed Ele block " << nele << "\t" << nhf << endl;
     
     // Selection criteria, either two electrons with pT 10 GeV in EB/EE
     // or one electron with 10 GeV in EB/EE and at least on HF electron
     // or two electrons in HF
-    bool twoElectrons  = nele > 1 && ele_pt[1] > 10.0;
-    bool electronAndHF = nele > 0 && ele_pt[0] > 10.0 && nhf > 0;
-    bool twoHF         = nhf > 1;
-    bool passEvent =  twoElectrons || electronAndHF || twoHF;
-    //bool passEvent = nele > 0 && ele_pt[0] > 15.0 && nhf > 0 && hf_pt[0] > 10.0;
-    //if ( !passEvent ) continue;
+    //bool twoElectrons  = nele > 1 && ele_pt[1] > 10.0;
+    //bool electronAndHF = nele > 0 && ele_pt[0] > 10.0 && nhf > 0;
+    //bool twoHF         = nhf > 1;
+    //bool passEvent =  twoElectrons || electronAndHF || twoHF;
+    if ( nele == 0 || nhf == 0 ) continue;
+    
+    bool passEvent = ele_pt[0] > 15.0 && hf_pt[0] > 10.0;
+    if ( !passEvent ) continue;
 
     run = data.GetInt("run");
     event = data.GetLong64("event");
     lumis = data.GetInt("lumis");
-    // std::cout << "topick " << run << ":" << lumis << ":" << event << std::endl;
+    //std::cout << "topick " << run << ":" << lumis << ":" << event << std::endl;
     
 
     tree->Fill();
