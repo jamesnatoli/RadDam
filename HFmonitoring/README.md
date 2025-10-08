@@ -100,7 +100,13 @@ python3 crabConfig_data.py
 which crates a directory `DataJobs` with a subdirectory named according to the variable `config.General.requestName`. The jobs can be monitored with `crab status DataJobs/RequestName` which also provides a grafana link.
 
 # Step 2: Untuplizer
-This step can proceed either interactively or via jobs with Condor. The interactive script can take a long time to run (5-10 hours, or more) and so it can be more convenient to use jobs. Both methods are described below
+
+This step can proceed either interactively or via jobs with Condor. The interactive script can take a long time to run (5-10 hours, or more) and so it can be more convenient to use jobs. Both methods are described below. But first you have to make changes in `xAna.C` prior to execution:
+
+```
+bool condor = false;
+bool isMC = true;  
+```
 
 ## Running Interactively
 - Use hadd to combine the nTuple trees (recommended to have one final MC file and one final data file for each run range)

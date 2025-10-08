@@ -4,11 +4,42 @@
 #include "setTDRStyle.C"
 #include "TFractionFitter.h"
 
+
+//TH1F* gTemplateHist = nullptr; // global pointer to MC histogram
+
+// double SignalTemplateFitFunc(double* x, double* par) {
+//     if (!gTemplateHist) return 0;
+// 		double xx = x[0];
+// 		double shiftedX = xx - par[1];
+//     int bin = gTemplateHist->FindBin(shiftedX);
+//     return par[0] * gTemplateHist->GetBinContent(bin); // par[0]: signal scale, par[1]: offset parameter
+// }
+
+// double BackgroundGaussFunc(double* x, double* par) {
+//     // par[0]: amplitude, par[1]: mean, par[2]: sigma
+//     return par[0] * TMath::Gaus(x[0], par[1], par[2], true);  // true = normalized
+// }
+
+
+// double CombinedTemplatePlusGaussian(double* x, double* par) {
+//     if (!gTemplateHist) return 0;
+
+//     double xx = x[0];
+//     double shiftedX = xx - par[1];
+//     // Signal: template histogram scaled
+//     int bin = gTemplateHist->FindBin(shiftedX);
+//     double signal = par[0] * gTemplateHist->GetBinContent(bin); // par[0] = signal scale, par[1]: offset parameter
+
+//     // Background: Gaussian
+//     double background = par[2] * TMath::Gaus(xx, par[3], par[4], true); // normalized Gaussian
+
+//     return signal + background;
+// 	} 
 TF1* gTemplateFit = nullptr;
 TF1* gTemplateFitM = nullptr;
 
 double SignalTemplateFitFunc(double* x, double* par) {
-    // par[0]: scaling parameter, we enforce positive scaling with abs()
+    // par[0]: (raw) scale parameter, we enforce positivity via abs()
     // par[1]: x‐shift
     if (!gTemplateFit) return 0;
     double xx = x[0] - par[1];
@@ -40,10 +71,11 @@ void MakePNGPlots22() {
   setTDRStyle();
   TCanvas* canvas = new TCanvas("canvas");
   // Make Changes Here
-  TString figdir = "Figures25C_noPU_overlay_n/";
+  TString figdir = "Figures25C_noPU_RaddCorr_v2/";
   TString year = "2025C";
-  TFile *fMC = new TFile("outplots/Corrections_2025C/output_mc_PLOTS_mc_noPU.root");
-  TFile *fData = new TFile("outplots/Corrections_2025C/output_data_2025C_PLOTS_data_noPU.root");
+  //TFile *fMC = new TFile("outplots/2024I_v1.2/output_mc_LO_PLOTS_mc_noPU.root");
+  TFile *fMC = new TFile("outplots/HF_25C/output_mc_PLOTS_mc_noPU.root");
+  TFile *fData = new TFile("outplots/HF_25C/output_data_2025C_PLOTS_data_noPU_RaddCorr.root");
   
 	
   TF1 *funcGaus = new TF1("fitGaus","gaus",0,100);
@@ -181,8 +213,10 @@ void MakePNGPlots22() {
     TH1F *hEtaPlusMC = (TH1F*)fMC->Get(EtaPlusNum);
     hEtaPlusMC->Draw();
     funcGaus->SetRange(hEtaPlusMC->GetMaximumBin()+5,hEtaPlusMC->GetMaximumBin()+35);
-    //if (i == 40) funcGaus->SetRange(75, 95); for manually setting the range
+    if (i == 40) funcGaus->SetRange(75, 95);
+    //funcGaus->SetParameters(hEtaPlusMC->GetMaximum(), hEtaPlusMC->GetMean(), hEtaPlusMC->GetRMS()); 
     TFitResultPtr FitResultEtaPlusMC = hEtaPlusMC->Fit("fitGaus","RSQ");
+    //FitResultEtaPlusMC->Print();
     double mcPlus = funcGaus->GetParameter(1);
     double mcPlusErr = funcGaus->GetParError(1);
     double mcWidthPlus = funcGaus->GetParameter(2);
@@ -210,13 +244,16 @@ void MakePNGPlots22() {
     canvas->Clear();
 		
     TH1F *hEtaPlusData = (TH1F*)fData->Get(EtaPlusNum);
-    double Neff_P = hEtaPlusData->GetEntries();
     hEtaPlusData->Draw();
+    if (i == 43){
+    funcGaus->SetRange(hEtaPlusData->GetMaximumBin()+5,hEtaPlusData->GetMaximumBin()+70);
+    }else {
     funcGaus->SetRange(hEtaPlusData->GetMaximumBin()+5,hEtaPlusData->GetMaximumBin()+35);
+    }
     //funcGaus->SetParameters(hEtaPlusData->GetMaximum(), hEtaPlusData->GetMean(), hEtaPlusData->GetRMS());
     TFitResultPtr FitResultEtaPlusData = hEtaPlusData->Fit("fitGaus","RSQ");
     double dataPlus = funcGaus->GetParameter(1);
-    double dataPlusErr = (funcGaus->GetParError(1))/std::sqrt(Neff_P);
+    double dataPlusErr = funcGaus->GetParError(1);
     double dataWidthPlus = funcGaus->GetParameter(2);
     double dataWidthPlusErr = funcGaus->GetParError(2);
     TString EntriesEtaPlusData = TString::Format("Entries: %.0f", hEtaPlusData->GetEntries());
@@ -242,7 +279,7 @@ void MakePNGPlots22() {
     canvas->Clear();
 	
 
-    //--------------------Combined Fit (Eta Plus)---------------------------------
+    // Template-fit: scale MC to match data
     TH1F* hEtaPlusMCTemplate = (TH1F*)hEtaPlusMC->Clone("hEtaPlusMCTemplate");
     gTemplateFit = (TF1*)hEtaPlusMCTemplate->GetFunction("fitGaus"); 		
     //Signal
@@ -260,13 +297,16 @@ void MakePNGPlots22() {
     combinedFunc->SetParLimits(2, 0, 1e5); 
     combinedFunc->SetParLimits(3, 120, 160);
     combinedFunc->SetParLimits(4, 10, 50);
+    // Perform fit
     TFitResultPtr fitResult = hEtaPlusData->Fit(combinedFunc, "RSQ", "", 20, 160);
     double shiftPlus    = combinedFunc->GetParameter(1);
     double shiftPlusErr = combinedFunc->GetParError(1);
     double combPlusMean    = mcPlus + shiftPlus;
-    double combPlusMeanErr = std::sqrt(mcPlusErr*mcPlusErr + shiftPlusErr*shiftPlusErr)/(std::sqrt(Neff_P));
+    double combPlusMeanErr = std::sqrt(mcPlusErr*mcPlusErr
+                                  + shiftPlusErr*shiftPlusErr);
     double combPlusSigma    = combinedFunc->GetParameter(2);
     double combPlusSigmaErr = combinedFunc->GetParError(2);
+    // Plot results
     hEtaPlusData->Draw("E");
     hEtaPlusData->SetMarkerStyle(20);
     hEtaPlusData->SetMarkerSize(0.8);
@@ -288,7 +328,7 @@ void MakePNGPlots22() {
     legend->SetTextFont(42);
     legend->SetTextSize(0.02);
     legend->SetFillStyle(0);
-    legend->AddEntry(hEtaPlusData, "Data", "l");
+    legend->AddEntry(hEtaPlusData, "Data", "lep");
     legend->AddEntry(bgFunc, "Background fit", "l");
     legend->AddEntry(signalFunc, "Signal fit", "l");
     legend->AddEntry(combinedFunc, "Combined Fit", "l");
@@ -302,50 +342,25 @@ void MakePNGPlots22() {
     latex.DrawLatex(0.7, 0.78, "#scale[1.0]{Combined Fit}");
     latex.DrawLatex(0.7, 0.75, TString::Format("Signal Scale = %.3f #pm %.3f", combinedFunc->GetParameter(0), fitResult->Error(0)));
     latex.DrawLatex(0.7, 0.72, TString::Format("Signal Shift = %.1f #pm %.1f", shiftPlus, shiftPlusErr));
-    latex.DrawLatex(0.7, 0.69, TString::Format("#mu = %.1f #pm %.3f", combPlusMean, combPlusMeanErr));
-    latex.DrawLatex(0.7, 0.66, TString::Format("#chi^{2} = %.2f", fitResult->Chi2()));
-    latex.DrawLatex(0.7, 0.63, TString::Format("ndf = %d", fitResult->Ndf()));
+    latex.DrawLatex(0.7, 0.69, TString::Format("#mu = %.1f #pm %.1f", combPlusMean, combPlusMeanErr));
+    latex.DrawLatex(0.7, 0.66, TString::Format("#sigma = %.1f #pm %.1f", combPlusSigma, combPlusSigmaErr));
+    latex.DrawLatex(0.7, 0.63, TString::Format("#chi^{2} = %.2f", fitResult->Chi2()));
+    latex.DrawLatex(0.7, 0.60, TString::Format("ndf = %d", fitResult->Ndf()));
     TString saveName = TString::Format(figdir + "Eta/EtaPlus%i_combinedfit.png", i);
     canvas->Print(saveName);
     canvas->Clear();
-    //--------------------------------------------------------------------------
-    
-    //-------Overlay Data on MC for EtaPlus-----
-    hEtaPlusMC->SetLineColor(kBlue);
-    hEtaPlusMC->SetLineWidth(1);
-    hEtaPlusMC->SetLineStyle(1);
-    hEtaPlusData->SetMarkerColor(kRed);
-    hEtaPlusData->SetMarkerSize(0.6);
-    hEtaPlusData->SetMarkerStyle(20);
-    double mcIntegral   = hEtaPlusMC->Integral();
-    double dataIntegral = hEtaPlusData->Integral();
-    double scaleFactor  = (mcIntegral > 0) ? dataIntegral / mcIntegral : 0.0;
-    double maxY = std::max(hEtaPlusMC->GetMaximum(), hEtaPlusData->GetMaximum());
-    hEtaPlusMC->SetMaximum(1.2 * maxY);
-    hEtaPlusMC->Draw("HIST");
-    hEtaPlusData->Draw("PE SAME");
-    TLegend* legOverlay = new TLegend(0.18, 0.75, 0.38, 0.88);
-    legOverlay->AddEntry(hEtaPlusData, year + " Data", "lep");
-    legOverlay->AddEntry(hEtaPlusMC, "MC", "l");
-    legOverlay->SetBorderSize(0);
-    legOverlay->Draw();
-    TLatex latexOverlay;
-    latexOverlay.SetTextFont(42);
-    latexOverlay.SetNDC();
-    latexOverlay.SetTextSize(0.03);
-    latexOverlay.DrawLatex(0.6, 0.77, TString::Format("Data/MC scale = %.3f", scaleFactor));
-    latexOverlay.DrawLatex(0.6, 0.82, TString::Format("i#eta%d(HF+)", i));
-    CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
-    TString EtaPlusOverlayName = TString::Format(figdir + "Eta/EtaPlus%i_overlay.png", i);
-    canvas->Print(EtaPlusOverlayName);
-    canvas->Clear();
-    //--------------------------------------
+
 		
     TString EtaMinusNum = TString::Format("etaMinus%i", i);
     TString EtaMinusBin = TString::Format("#eta%i (HF-)", i);				
     TH1F *hEtaMinusMC = (TH1F*)fMC->Get(EtaMinusNum);
     hEtaMinusMC->Draw();
+    if (i == 43){
+    funcGaus->SetRange(hEtaMinusMC->GetMaximumBin()+5,hEtaMinusMC->GetMaximumBin()+70);
+    }else{
     funcGaus->SetRange(hEtaMinusMC->GetMaximumBin()+5,hEtaMinusMC->GetMaximumBin()+35);
+    }
+    //funcGaus->SetParameters(hEtaMinusMC->GetMaximum(), hEtaMinusMC->GetMean(), hEtaMinusMC->GetRMS());
     TFitResultPtr FitResultEtaMinusMC = hEtaMinusMC->Fit("fitGaus","RSQ");
     double mcMinus = funcGaus->GetParameter(1);
     double mcMinusErr = funcGaus->GetParError(1);
@@ -374,13 +389,16 @@ void MakePNGPlots22() {
     canvas->Clear();
 		
     TH1F *hEtaMinusData = (TH1F*)fData->Get(EtaMinusNum);
-    double Neff_M = hEtaMinusData->GetEntries();
     hEtaMinusData->Draw();
+    if (i == 43){
+    funcGaus->SetRange(hEtaMinusData->GetMaximumBin()+5,hEtaMinusData->GetMaximumBin()+70);
+    }else{
     funcGaus->SetRange(hEtaMinusData->GetMaximumBin()+5,hEtaMinusData->GetMaximumBin()+35);
+    }
     //funcGaus->SetParameters(hEtaMinusData->GetMaximum(), hEtaMinusData->GetMean(), hEtaMinusData->GetRMS());
     TFitResultPtr FitResultEtaMinusData = hEtaMinusData->Fit("fitGaus","RSQ");
     double dataMinus = funcGaus->GetParameter(1);
-    double dataMinusErr = (funcGaus->GetParError(1))/std::sqrt(Neff_M);
+    double dataMinusErr = funcGaus->GetParError(1);
     double dataWidthMinus = funcGaus->GetParameter(2);
     double dataWidthMinusErr = funcGaus->GetParError(2);
     TString EntriesEtaMinusData = TString::Format("Entries: %.0f", hEtaMinusData->GetEntries());
@@ -404,17 +422,19 @@ void MakePNGPlots22() {
     TString EtaMinusNameData = TString::Format( figdir + "Eta/EtaMinus%i_data.png", i);
     canvas->Print(EtaMinusNameData);
     canvas->Clear();
-    
-    //--------------------Combined Fit (Eta Minus)------------------------
+
     TH1F* hEtaMinusMCTemplate = (TH1F*)hEtaMinusMC->Clone("hEtaMinusMCTemplate");
     gTemplateFitM = (TF1*)hEtaMinusMCTemplate->GetFunction("fitGaus");
+
     TF1* signalFuncM = new TF1("signalFuncM", SignalTemplateFitFunc, 20, 160, 2); 
     signalFuncM->SetParameters(1.0, 0.0);
     signalFuncM->SetParNames("Signal_Scale","Signal_Shift");
+
     // Background Gaussian TF1 (amp, mean, sigma)
     TF1* bgFuncM = new TF1("bgFuncM", BackgroundGaussFunc, 20, 160, 3);
     bgFuncM->SetParameters(100, 140.0, 20.0);
     bgFuncM->SetParNames("BG_Amp","BG_Mean","BG_Sigma");
+
     // Combined fit function (sigScale, sigShift, bgAmp, bgMean, bgSigma)
     TF1* combinedFuncM = new TF1("combinedFuncM",CombinedTemplatePlusGaussian, 20, 160, 5);
     combinedFuncM->SetParameters(1.0, 0.0, 100.0, 140.0, 20.0);
@@ -422,37 +442,44 @@ void MakePNGPlots22() {
     combinedFuncM->SetParLimits(2, 0, 1e5);     // BG_Amp
     combinedFuncM->SetParLimits(3, 120, 160);   // BG_Mean
     combinedFuncM->SetParLimits(4, 10, 50);
+
+
     TFitResultPtr fitResultM = hEtaMinusData->Fit(combinedFuncM, "RSQ", "", 20, 160);
     double shiftMinus    = combinedFuncM->GetParameter(1);
     double shiftMinusErr = combinedFuncM->GetParError(1);
     double combMinusMean    = mcMinus + shiftMinus;
-    double combMinusMeanErr = std::sqrt(mcMinusErr*mcMinusErr + shiftMinusErr*shiftMinusErr)/std::sqrt(Neff_M);
+    double combMinusMeanErr = std::sqrt(mcMinusErr*mcMinusErr + shiftMinusErr*shiftMinusErr);
     double combMinusSigma    = combinedFuncM->GetParameter(2);
     double combMinusSigmaErr = combinedFuncM->GetParError(2);
+
     hEtaMinusData->Draw("E");
     hEtaMinusData->SetMarkerStyle(21);
     hEtaMinusData->SetMarkerSize(0.8);
     combinedFuncM->SetLineColor(kRed);
     combinedFuncM->SetLineWidth(2);
     combinedFuncM->Draw("SAME");
+
     signalFuncM->SetParameters( combinedFuncM->GetParameter(0), combinedFuncM->GetParameter(1));
     signalFuncM->SetLineColor(kBlue);
     signalFuncM->SetLineWidth(2);
     signalFuncM->Draw("SAME");
+
     bgFuncM->SetParameters(combinedFuncM->GetParameter(2), combinedFuncM->GetParameter(3), combinedFuncM->GetParameter(4));
     bgFuncM->SetLineColor(kGreen+2);
     bgFuncM->SetLineWidth(2);
     bgFuncM->Draw("SAME");
+
     TLegend* legendM = new TLegend(0.15, 0.60, 0.40, 0.80);
     legendM->SetBorderSize(0);
     legendM->SetFillStyle(0);
     legendM->SetTextFont(42);
     legendM->SetTextSize(0.02);
-    legendM->AddEntry(hEtaMinusData,   "Data",            "l");
+    legendM->AddEntry(hEtaMinusData,   "Data",            "lep");
     legendM->AddEntry(bgFuncM,         "Background fit",  "l");
     legendM->AddEntry(signalFuncM,     "Signal fit",      "l");
     legendM->AddEntry(combinedFuncM,   "Combined Fit",    "l");
     legendM->Draw();
+
     TLatex latexM;
     latexM.SetTextFont(42);
     latexM.SetNDC();
@@ -462,44 +489,14 @@ void MakePNGPlots22() {
     latexM.DrawLatex(0.7,0.78, "#scale[1.0]{Combined Fit}");
     latexM.DrawLatex(0.7,0.75, TString::Format("Signal Scale = %.3f #pm %.3f", combinedFuncM->GetParameter(0), fitResultM->Error(0)));
     latexM.DrawLatex(0.7,0.72, TString::Format("Signal Shift = %.1f #pm %.1f", shiftMinus, shiftMinusErr));
-    latexM.DrawLatex(0.7,0.69, TString::Format("#mu = %.1f #pm %.3f", combMinusMean, combMinusMeanErr));
-    latexM.DrawLatex(0.7,0.66, TString::Format("#chi^{2} = %.2f", fitResultM->Chi2()));
-    latexM.DrawLatex(0.7,0.63, TString::Format("ndf = %d", fitResultM->Ndf()));
+    latexM.DrawLatex(0.7,0.69, TString::Format("#mu = %.1f #pm %.1f", combMinusMean, combMinusMeanErr));
+    latexM.DrawLatex(0.7,0.66, TString::Format("#sigma = %.1f #pm %.1f", combMinusSigma, combMinusSigmaErr));
+    latexM.DrawLatex(0.7,0.63, TString::Format("#chi^{2} = %.2f", fitResultM->Chi2()));
+    latexM.DrawLatex(0.7,0.60, TString::Format("ndf = %d", fitResultM->Ndf()));
     TString saveNameM = TString::Format(figdir + "Eta/EtaMinus%i_combinedfit.png", i);
     canvas->Print(saveNameM);
     canvas->Clear();
-    
-    //------------------Overlay Data on MC-----------------------
-    hEtaMinusMC->SetLineColor(kBlue);
-    hEtaMinusMC->SetLineWidth(1);
-    hEtaMinusMC->SetLineStyle(1);
-    hEtaMinusData->SetMarkerColor(kRed);
-    hEtaMinusData->SetMarkerSize(0.6);
-    hEtaMinusData->SetMarkerStyle(20);
-    double mcIntegralMinus   = hEtaMinusMC->Integral();
-    double dataIntegralMinus = hEtaMinusData->Integral();
-    double scaleFactorMinus  = (mcIntegralMinus > 0) ? dataIntegralMinus / mcIntegralMinus : 0.0;
-    double maxY_M = std::max(hEtaMinusMC->GetMaximum(), hEtaMinusData->GetMaximum()); 
-    hEtaMinusMC->SetMaximum(1.2 * maxY_M);
-    hEtaMinusMC->Draw("HIST");
-    hEtaMinusData->Draw("PE SAME");
-    TLegend* legOverlayMinus = new TLegend(0.18, 0.75, 0.38, 0.88);
-    legOverlayMinus->AddEntry(hEtaMinusData, year + " Data", "lep");
-    legOverlayMinus->AddEntry(hEtaMinusMC, "MC", "l");
-    legOverlayMinus->SetBorderSize(0);
-    legOverlayMinus->Draw();
-    TLatex latexOverlayMinus;
-    latexOverlayMinus.SetTextFont(42);
-    latexOverlayMinus.SetNDC();
-    latexOverlayMinus.SetTextSize(0.03);
-    latexOverlayMinus.DrawLatex(0.6, 0.77, TString::Format("Data/MC scale = %.3f", scaleFactorMinus));
-    latexOverlayMinus.DrawLatex(0.6, 0.82, TString::Format("i#eta%d(HF-)", i));
-    CMSlabel.DrawLatex(0.128,0.955,"#bf{CMS} #it{Preliminary}");
-    TString EtaMinusOverlayName = TString::Format(figdir + "Eta/EtaMinus%i_overlay.png", i);
-    canvas->Print(EtaMinusOverlayName);
-    canvas->Clear();
-    //------------------------------------------------------------
-    
+
     hEtaMCAll->SetBinContent(i-29, (mcPlus+mcMinus)*0.5);
     
     /*hEtaPlusDataAll->SetBinContent(i-29, dataPlus);
@@ -514,7 +511,11 @@ void MakePNGPlots22() {
     
     /*hEtaWidthMCAll->SetBinContent(i-29, (mcWidthPlus+mcWidthMinus)*0.5);
     hEtaWidthDataAll->SetBinContent(i-29, (dataWidthPlus+dataWidthMinus)*0.5);
-    hEtaWidthDataAll->SetBinError(i-29, (dataWidthPlusErr+dataWidthMinusErr)*0.5);*/
+    hEtaWidthDataAll->SetBinError(i-29, (dataWidthPlusErr+dataWidthMinusErr)*0.5);
+
+    /*hEtaWidthMCAll->SetBinContent(i-29, (mcWidthPlus+mcWidthMinus)*0.5);
+    hEtaWidthDataAll->SetBinContent(i-29, (combPlusSigma+combMinusSigma)*0.5);
+    hEtaWidthDataAll->SetBinError(i-29, (combPlusSigmaErr+combMinusSigmaErr)*0.5);*/
     
     canvas->SetLogy(0);
   } // end eta loop

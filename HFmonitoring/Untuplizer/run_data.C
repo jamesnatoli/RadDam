@@ -2,15 +2,7 @@
   gROOT->LoadMacro("xAna.C+");
   
   const char* inpaths[] = {
-    "/afs/cern.ch/user/n/naislam/HFCaliberation/2024/test/CMSSW_14_0_11/src/RadDam/HFmonitoring/nTuplizer/ggAnalysis/ggNtuplizer/test/ggTree_mc.root"
-    //"/hdfs/store/user/jnatoli/2022HF/EGamma/crab_EGamma_Run2022E/231003_154951/0000/ggTree_1.root"
-    // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022B_0000.root",
-    // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022C_0000.root",
-    // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022C_0001.root",
-    // "/eos/user/j/jnatoli/HFCalib/2022HF/EGamma/ggTree_EGamma_Run2022D_0000.root"
-    // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022E_0000.root",
-    // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022E_0001.root",
-    // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022F_0000_0-249.root",
+  	"/eos/user/n/naislam/HF_Raddam_2/2025/2025C/MC/WJ/Tuplizer/WJetsToLNu_TuneCP5_13p6TeV_madgraphMLM-pythia8/crab_WJetsToLNu/250909_132410/0000/ggTree_mc_76.root"
     // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022F_0000-250-499.root",
     // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022F_0000-500-749.root",
     // "davs://cmsxrootd.hep.wisc.edu:1094//store/user/jnatoli/hadded/2022HF/EGamma/ggTree_EGamma_Run2022F_0000-750-999.root",

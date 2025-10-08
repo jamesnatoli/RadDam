@@ -50,6 +50,12 @@ vector<float>  elePFNeuIso_;
 vector<float>  elePFPUIso_;
 vector<float>  elePFClusEcalIso_;
 vector<float>  elePFClusHcalIso_;
+vector<float>  eleIDMVAIso_;
+vector<float>  eleIDMVANoIso_;
+vector<ULong64_t> eleFiredSingleTrgs_;
+//vector<ULong64_t> eleFiredDoubleTrgs_;
+//vector<ULong64_t> eleFiredL1Trgs_;
+vector<UShort_t>  eleIDbit_;
 
 
 void ggNtuplizer::branchesElectrons(TTree* tree) {
@@ -91,6 +97,12 @@ void ggNtuplizer::branchesElectrons(TTree* tree) {
   tree->Branch("elePFPUIso",              &elePFPUIso_);
   tree->Branch("elePFClusEcalIso",        &elePFClusEcalIso_);
   tree->Branch("elePFClusHcalIso",        &elePFClusHcalIso_);
+  tree->Branch("eleIDMVAIso",             &eleIDMVAIso_);
+  tree->Branch("eleIDMVANoIso",           &eleIDMVANoIso_);
+  tree->Branch("eleFiredSingleTrgs",          &eleFiredSingleTrgs_);
+  //tree->Branch("eleFiredDoubleTrgs",          &eleFiredDoubleTrgs_);
+  //tree->Branch("eleFiredL1Trgs",              &eleFiredL1Trgs_);
+  tree->Branch("eleIDbit",                    &eleIDbit_);
   
 }
 
@@ -133,6 +145,12 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
   elePFPUIso_                 .clear();
   elePFClusEcalIso_           .clear();
   elePFClusHcalIso_           .clear();
+  eleIDMVAIso_                .clear();
+  eleIDMVANoIso_              .clear();
+  eleFiredSingleTrgs_         .clear();
+  //eleFiredDoubleTrgs_         .clear();
+  //eleFiredL1Trgs_             .clear();
+  eleIDbit_                   .clear();
 
   nEle_ = 0;
 
@@ -194,6 +212,10 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
     eleSCPhiWidth_      .push_back(iEle->superCluster()->phiWidth());
     eleHoverE_          .push_back(iEle->hcalOverEcal());
 
+    eleFiredSingleTrgs_ .push_back(matchSingleElectronTriggerFilters(iEle->pt(), iEle->eta(), iEle->phi()));
+    //eleFiredDoubleTrgs_ .push_back(matchDoubleElectronTriggerFilters(iEle->pt(), iEle->eta(), iEle->phi()));
+    //eleFiredL1Trgs_     .push_back(matchL1TriggerFilters(iEle->pt(), iEle->eta(), iEle->phi()));
+
     ///https://cmssdt.cern.ch/SDT/doxygen/CMSSW_7_2_2/doc/html/d8/dac/GsfElectron_8h_source.html
     eleEoverP_          .push_back(iEle->eSuperClusterOverP());
     eleEoverPout_       .push_back(iEle->eEleClusterOverPout());
@@ -220,6 +242,24 @@ void ggNtuplizer::fillElectrons(const edm::Event &e, const edm::EventSetup &es, 
 
     eleSigmaIEtaIEtaFull5x5_    .push_back(iEle->full5x5_sigmaIetaIeta());
     eleSigmaIPhiIPhiFull5x5_    .push_back(iEle->full5x5_sigmaIphiIphi());
+    
+    // VID decisions for Run3: https://github.com/cms-sw/cmssw/blob/ebb1b5360565c04dee9c7629018c9db9ae00da72/PhysicsTools/NanoAOD/python/electrons_cff.py
+    UShort_t tmpeleIDbit = 0;   
+    bool isPassVeto   = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-veto");
+    if (isPassVeto)   setbit(tmpeleIDbit, 0);    
+    bool isPassLoose  = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-loose");
+    if (isPassLoose)  setbit(tmpeleIDbit, 1);   
+    bool isPassMedium = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-medium");
+    if (isPassMedium) setbit(tmpeleIDbit, 2);    
+    bool isPassTight  = iEle->electronID("cutBasedElectronID-RunIIIWinter22-V1-tight");
+    if (isPassTight)  setbit(tmpeleIDbit, 3);    
+    bool isPassHEEP   = iEle->electronID("heepElectronID-HEEPV70");
+    if (isPassHEEP)   setbit(tmpeleIDbit, 4);
+    
+    eleIDMVAIso_  .push_back(iEle->userFloat("ElectronMVAEstimatorRun2RunIIIWinter22IsoV1Values"));
+    eleIDMVANoIso_.push_back(iEle->userFloat("ElectronMVAEstimatorRun2RunIIIWinter22NoIsoV1Values"));
+    
+    eleIDbit_.push_back(tmpeleIDbit);
 
     nEle_++;
   }

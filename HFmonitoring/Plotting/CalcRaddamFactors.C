@@ -18,7 +18,11 @@ double finter( double *x, double*par) {
 double FindIntercept(TF1* f1, TF1* f2) {
   fInter1 = f1;
   fInter2 = f2;
-  TF1 *fint = new TF1( "fint", finter, -10, 10, 0);
+  double xmin = std::max(f1->GetXmin(), f2->GetXmin());
+  double xmax = std::min(f1->GetXmax(), f2->GetXmax());
+  
+  //TF1 *fint = new TF1( "fint", finter, -10, 10, 0);//linear
+  TF1 *fint = new TF1( "fint", finter, xmin, xmax, 0);
   double xint = fint->GetMinimumX(); 
   MarkAndText( xint, f1->Eval( xint));
   return xint;
@@ -56,9 +60,9 @@ void CalcRaddamFactors() {
   setTDRStyle();
   
   // MAKE CHANGES HERE 
-  TString figdir = "FactorFigures22EFG_postEE_noPU/";
-  TFile *fMC = new TFile("outplots/outplots2022_mc_noPU.root");
-  TFile *fData = new TFile("outplots/output_data_EGamma_Run2022EFG_postEE_PLOTS_data_noPU_radFactors_test.root");
+  TString figdir = "FactorFigures_25C_changed/";
+  TFile *fMC = new TFile("outplots/Corrections_2025C/output_mc_PLOTS_mc_noPU.root");
+  TFile *fData = new TFile("outplots/Corrections_2025C/output_data_2025C_PLOTS_data_noPU_radFactors.root");
   
   // create canvases
   TCanvas* pcanvas = new TCanvas("canvasPlus"); 
@@ -113,12 +117,12 @@ void CalcRaddamFactors() {
 
   // fill vector with factors for x values
   for (int i = 0; i < nFactors; ++i)
-    factors.push_back( 1.0 + (i * fint));
+    factors.push_back( 0.8 + (i * fint));
 
   // Get the MC / Data ratio
   std::map< int, double> RaddamRatios;
-  TH1F* pRatio = new TH1F("pRatio", "", 10, 29.5, 39.5);
-  TH1F* mRatio = new TH1F("mRatio", "", 10, 29.5, 39.5);
+  TH1F* pRatio = new TH1F("pRatio", "", 12, 29.5, 41.5);
+  TH1F* mRatio = new TH1F("mRatio", "", 12, 29.5, 41.5);
   // Double_t ietas[10] = {30, 31, 32, 33, 34, 35, 36, 37, 38, 39};
   // Double_t xErrors[10] = {0};
   // Double_t pRatio[10] = {0};
@@ -128,7 +132,7 @@ void CalcRaddamFactors() {
 
   // canvas->cd();
   // Loop over Etas
-  for (int i = 30; i <= 39; ++i) { 
+  for (int i = 30; i <= 41; ++i) { 
     std::cout << ">> iEta: " << i << std::endl;
     // First MC PLUS
     TString EtaPlusNum = TString::Format("etaPlus%i", i);
@@ -233,7 +237,8 @@ void CalcRaddamFactors() {
     graphPlus->Draw();
 
     // Fit the points to a line
-    TF1* factorFitPlus = new TF1( "factorFitPlus", "[0]*x + [1]");
+    //TF1* factorFitPlus = new TF1( "factorFitPlus", "[0]*x + [1]"); //FIXME linear
+    TF1* factorFitPlus = new TF1("factorFitPlus", "[0]*sqrt(x)", 0.8, 1.8);
     graphPlus->Fit( factorFitPlus, "Q");
 
     // Draw the MC Mean as a constant line
@@ -264,7 +269,8 @@ void CalcRaddamFactors() {
     graphMinus->SetLineColor( kBlue);
     graphMinus->SetLineWidth( 2);
     graphMinus->Draw();
-    TF1* factorFitMinus = new TF1( "factorFitMinus", "[0]*x + [1]");
+    //TF1* factorFitMinus = new TF1( "factorFitMinus", "[0]*x + [1]");//FIXME linear
+    TF1* factorFitMinus = new TF1("factorFitMinus", "[0]*sqrt(x)", 0.8, 1.8);
     graphMinus->Fit( factorFitMinus, "Q");
     TF1 *mcMeanMinusLine = new TF1( "mcMeanMinus", "[0]", -10, 10);
     mcMeanMinusLine->SetParameter( 0, mcMeanMinus);
@@ -304,7 +310,7 @@ void CalcRaddamFactors() {
   std::cout << "\n" << std::endl;
   std::cout << "*** RADDAM FACTORS for iEtas *** " << std::endl;
   for (auto ele : RaddamFactors) {
-    std::cout << "iEta " << setw(3) << ele.first << ": " << ele.second << std::endl;
+    std::cout << "{" << setw(3) << ele.first << "," << ele.second << "},"<<std::endl;
   }
 
   // I think this is obselete?
@@ -316,5 +322,6 @@ void CalcRaddamFactors() {
   }
 
   std::cout << "All Done :)" << std::endl;
+  std::cout << "Output file is :" << figdir <<std::endl;
   return;  
 }

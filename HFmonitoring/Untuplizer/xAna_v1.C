@@ -74,8 +74,8 @@ void xAna( TreeReader* pdata) {
   tree->Branch("mc_eta",     &mc_eta);
   tree->Branch("mc_phi",     &mc_phi);
 
-  bool condor = false;
-  bool isMC = true;
+  bool condor = true;
+  bool isMC = false;
   
   Long64_t nev = data.GetEntriesFast();
   std::cout << "Processing " << nev << " events..." << std::endl;

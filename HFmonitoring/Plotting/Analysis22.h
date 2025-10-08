@@ -29,8 +29,11 @@ public :
    Int_t           event;
    Int_t           nvtx;
    Int_t           nele;
+   Float_t         puppiMET;
+   Float_t         puppiMETPhi;
    vector<float>   *ele_pt;
    vector<float>   *ele_eta;
+   vector<float>   *ele_SCeta;
    vector<float>   *ele_phi;
    vector<int>     *ele_mediumID;
    Int_t           nhf;
@@ -41,8 +44,14 @@ public :
    vector<float>   *hf_iso;
    vector<float>   *hf_ecal;
    vector<float>   *hf_hcal;
-   // vector<int>     *hf_type;
-   // vector<int>     *hf_match;
+   //vector<float>   *prob_sig;
+   vector<int>     *hf_match;
+   vector<int>     *ecal_match;
+   vector<float>   *eleIDMVAIso;
+   vector<float>   *eleIDMVANoIso;
+   vector<ULong64_t> *eleFiredSingleTrgs;
+   vector<UShort_t> *eleIDbit;
+
    // Int_t           nmc;
    // vector<float>   *mc_pt;
    // vector<float>   *mc_eta;
@@ -52,9 +61,12 @@ public :
    TBranch        *b_run;   //!
    TBranch        *b_event;   //!
    TBranch        *b_nvtx;   //!
+   TBranch        *b_puppiMET;
+   TBranch        *b_puppiMETPhi;
    TBranch        *b_nele;   //!
    TBranch        *b_ele_pt;   //!
    TBranch        *b_ele_eta;   //!
+   TBranch        *b_ele_SCeta;
    TBranch        *b_ele_phi;   //!
    TBranch        *b_ele_mediumID;   //!
    TBranch        *b_nhf;   //!
@@ -65,12 +77,19 @@ public :
    TBranch        *b_hf_iso;   //!
    TBranch        *b_hf_ecal;   //!
    TBranch        *b_hf_hcal;   //!
+   //TBranch        *b_prob_sig;
    // TBranch        *b_hf_type;   //!
-   // TBranch        *b_hf_match;   //!
+   TBranch        *b_hf_match;   //!
+   TBranch        *b_ecal_match;   //!
    // TBranch        *b_nmc;   //!
    // TBranch        *b_mc_pt;   //!
    // TBranch        *b_mc_eta;   //!
    // TBranch        *b_mc_phi;   //!
+   TBranch        *b_eleIDMVAIso;   //!
+   TBranch        *b_eleIDMVANoIso; //!
+   TBranch        *b_eleFiredSingleTrgs; //!
+   TBranch        *b_eleIDbit;
+
 
    Analysis22(TTree *tree=0);
    Analysis22( const char* fname);
@@ -94,9 +113,9 @@ Analysis22::Analysis22(TTree *tree) : fChain(0)
 // used to generate this class and read the Tree.
   if (tree == 0) {
     // Look locally at first
-    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/eos/user/j/jnatoli/HFCalib/2022HF/Untuplizer/output_data_EGamma_Run2022BCD_10Dec2022_preEE.root");
+    TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/eos/user/n/naislam/HF_Raddam_2/2025/2025C/Untuplizer_v/output_data_2025C.root");
     if (!f || !f->IsOpen()) {
-      f = new TFile("/eos/user/j/jnatoli/HFCalib/2022HF/Untuplizer/output_data_EGamma_Run2022BCD_10Dec2022_preEE.root");
+      f = new TFile("/eos/user/n/naislam/HF_Raddam_2/2025/2025C/Untuplizer_v/output_data_2025C.root");
     }
     f->GetObject("miniTree",tree);
     
@@ -190,6 +209,7 @@ void Analysis22::Init(TTree *tree)
    ele_eta = 0;
    ele_phi = 0;
    ele_mediumID = 0;
+   ele_SCeta =0;
    hf_en = 0;
    hf_pt = 0;
    hf_eta = 0;
@@ -197,8 +217,16 @@ void Analysis22::Init(TTree *tree)
    hf_iso = 0;
    hf_ecal = 0;
    hf_hcal = 0;
+   //prob_sig = 0;
    // hf_type = 0;
-   // hf_match = 0;
+   hf_match = 0;
+   ecal_match = 0;
+   eleIDMVAIso = 0;
+   eleIDMVANoIso = 0;
+   eleFiredSingleTrgs = 0;
+   eleIDbit = 0;
+
+   
    // mc_pt = 0;
    // mc_eta = 0;
    // mc_phi = 0;
@@ -211,9 +239,12 @@ void Analysis22::Init(TTree *tree)
    fChain->SetBranchAddress("run", &run, &b_run);
    fChain->SetBranchAddress("event", &event, &b_event);
    fChain->SetBranchAddress("nvtx", &nvtx, &b_nvtx);
+   fChain->SetBranchAddress("puppiMET", &puppiMET, &b_puppiMET);
+   fChain->SetBranchAddress("puppiMETPhi", &puppiMETPhi, &b_puppiMETPhi);
    fChain->SetBranchAddress("nele", &nele, &b_nele);
    fChain->SetBranchAddress("ele_pt", &ele_pt, &b_ele_pt);
    fChain->SetBranchAddress("ele_eta", &ele_eta, &b_ele_eta);
+   fChain->SetBranchAddress("ele_SCeta", &ele_SCeta, &b_ele_SCeta);
    fChain->SetBranchAddress("ele_phi", &ele_phi, &b_ele_phi);
    fChain->SetBranchAddress("ele_mediumID", &ele_mediumID, &b_ele_mediumID);
    fChain->SetBranchAddress("nhf", &nhf, &b_nhf);
@@ -224,12 +255,18 @@ void Analysis22::Init(TTree *tree)
    fChain->SetBranchAddress("hf_iso", &hf_iso, &b_hf_iso);
    fChain->SetBranchAddress("hf_ecal", &hf_ecal, &b_hf_ecal);
    fChain->SetBranchAddress("hf_hcal", &hf_hcal, &b_hf_hcal);
+   //fChain->SetBranchAddress("prob_sig", &prob_sig, &b_prob_sig);
    // fChain->SetBranchAddress("hf_type", &hf_type, &b_hf_type);
-   // fChain->SetBranchAddress("hf_match", &hf_match, &b_hf_match);
+   fChain->SetBranchAddress("hf_match", &hf_match, &b_hf_match);
+   fChain->SetBranchAddress("ecal_match", &ecal_match, &b_ecal_match);
    // fChain->SetBranchAddress("nmc", &nmc, &b_nmc);
    // fChain->SetBranchAddress("mc_pt", &mc_pt, &b_mc_pt);
    // fChain->SetBranchAddress("mc_eta", &mc_eta, &b_mc_eta);
    // fChain->SetBranchAddress("mc_phi", &mc_phi, &b_mc_phi);
+   fChain->SetBranchAddress("eleIDMVAIso", &eleIDMVAIso, &b_eleIDMVAIso);
+   fChain->SetBranchAddress("eleIDMVANoIso", &eleIDMVANoIso, &b_eleIDMVANoIso);
+   fChain->SetBranchAddress("eleFiredSingleTrgs", &eleFiredSingleTrgs, &b_eleFiredSingleTrgs);
+   fChain->SetBranchAddress("eleIDbit", &eleIDbit, &b_eleIDbit);
    Notify();
 }
 

@@ -10,7 +10,7 @@ log        = $(era)/jobs/log/$(batch_name)_output.$(ClusterID).$(ProcID).log
 # https://osg-htc.org/user-school-2017/materials/day2/files/osgus17-day2-part4-troubleshooting.pdf
 # get_env    = True
 +JobFlavour           = "longlunch"
-x509userproxy         = /afs/cern.ch/user/n/naislam/private/x509up_u92951
+x509userproxy         = /afs/cern.ch/user/n/naislam/private/x509up_u153856
 should_transfer_files = yes
 transfer_input_files  = $(era)/infiles/chunk_$(ProcID).txt, xana
 transfer_output_files = ""

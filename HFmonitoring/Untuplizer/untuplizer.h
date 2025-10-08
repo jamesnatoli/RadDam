@@ -164,6 +164,13 @@ class TreeReader {
    std::vector<Int_t>* GetPtrVectorInt(const char* bname) {
       return (std::vector<Int_t>*) GetPtr(bname, kArrVectInt);
    }
+   std::vector<ULong64_t>* GetPtrVectorULong64(const char* bname) {
+    return (std::vector<ULong64_t>*) GetPtr(bname, kArrULong64Vector);
+   }
+   std::vector<UShort_t>* GetPtrVectorUShort(const char* bname) {
+    return (std::vector<UShort_t>*) GetPtr(bname, kArrUShortVector);
+   }
+
 
  protected:
 

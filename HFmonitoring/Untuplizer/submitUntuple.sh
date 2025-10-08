@@ -5,8 +5,8 @@
 # TODO: figure out procedure for if jobs fail?
 
 RCOMP="`root-config --cflags --glibs`"
-macro=xAna_data.C
-bin=xanadata
+macro=xAna.C
+bin=xana
 
 # Parse arguments
 iflag=false; oflag=false; eflag=false; uflag=false; nflag=false; dflag=false

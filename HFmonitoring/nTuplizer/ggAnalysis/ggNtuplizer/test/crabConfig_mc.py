@@ -50,14 +50,22 @@ if __name__ == '__main__':
     # p.join()
 
     # Part 2
-    # 2024MC
-    config.General.requestName = 'DYJetsToLL_M-50_Winter24_v10-v3_v2'
-    config.Data.inputDataset   = '/DYto2L-4Jets_MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter24MiniAOD-133X_mcRun3_2024_realistic_v10-v3/MINIAODSIM'
-    config.Data.outLFNDirBase  = '/store/user/naislam/HFCalibration/2024/Tuplizer/test/2024HF/MC'
+    '''
+    # 2025winterMC
+    config.General.requestName = 'DYto2L-4Jets_MLL-50_LO'
+    config.Data.inputDataset   = '/DYto2L-4Jets_Bin-MLL-50_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter25MiniAOD-142X_mcRun3_2025_realistic_v9-v3/MINIAODSIM'
+    config.Data.outLFNDirBase  = '/store/user/naislam/HF_Raddam_2/2025/2025C/MC/Tuplizer'
     p = Process(target=submit, args=(config,))
     p.start()
     p.join()
-
+    '''
+    # 2025winterMC
+    config.General.requestName = 'WJetsToLNu'
+    config.Data.inputDataset   = '/WJetsToLNu_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Winter25MiniAOD-142X_mcRun3_2025_realistic_v7-v2/MINIAODSIM'
+    config.Data.outLFNDirBase  = '/store/user/naislam/HF_Raddam_2/2025/2025C/MC/WJ/Tuplizer'
+    p = Process(target=submit, args=(config,))
+    p.start()
+    p.join()
     
 
 
